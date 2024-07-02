@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignalR Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #roomListContainer, #messageContainer, #joinRoomForm {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #roomListContainer {
+            width: 250px;
+            margin-right: 20px;
+        }
+        #messageContainer {
+            flex-grow: 1;
+            max-width: 600px;
+        }
+        #messageList {
+            max-height: 400px; /* Adjust height as per your design */
+            overflow-y: auto;
+        }
+        #memberList {
+            max-height: 170px; /* Adjust height as per your design */
+            overflow-y: auto;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            font-weight: bold;
+        }
+        .input-group input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px;
+            margin-left: 10px;
+        }
+        .input-group button {
+            padding: 8px 16px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .input-group button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        li.owner {
+            color: red;
+        }
+        li.member {
+            color: blue;
+        }
+        .member-actions {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="roomListContainer">
+    <h2>Rooms</h2>
+    <div id="roomList"></div>
+</div>
+<div id="messageContainer">
+    <h2 id="currentRoomName">No Room Selected</h2>
+    <div class="input-group">
+        <input type="text" id="messageInput" placeholder="Type your message..." disabled>
+        <button id="sendButton" disabled>Send</button>
+    </div>
+    <ul id="messageList"></ul>
+    <h2>Members</h2>
+    <ul id="memberList"></ul> <!-- Display members of the current room -->
+    <div class="member-actions" style="display: none;">
+        <label for="removeMemberInput">Remove Member:</label>
+        <input type="text" id="removeMemberInput" placeholder="Enter member's username...">
+        <button id="removeMemberButton">Remove</button>
+    </div>
+    <div id="joinRoomButtonContainer" style="display: none;">
+        <button id="joinRoomButton">Join Room</button>
+    </div>
+</div>
+
+<div id="joinRoomForm">
+    <div class="input-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" placeholder="Enter your username...">
+        <button id="registerButton">Register</button>
+    </div>
+    <div class="input-group">
+        <label for="roomName">Room Name:</label>
+        <input type="text" id="roomName" placeholder="Enter room name...">
+        <button id="createRoomButton">Create Room</button>
+        <button id="deleteRoomButton">Delete Room</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
