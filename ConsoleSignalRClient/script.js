@@ -231,7 +231,9 @@ function removeMember() {
     var memberToRemove = removeMemberInput.value;
 
     if (connection.state === signalR.HubConnectionState.Connected && roomName && user && memberToRemove) {
-        connection.invoke("RemoveMember", user, roomName, memberToRemove)
+        connection.invoke("RemoveMember", user, roomName, memberToRemove).then(function () {
+            updateMemberList(roomName);
+        })
             .catch(function (err) {
                 console.error(err.toString());
             });
