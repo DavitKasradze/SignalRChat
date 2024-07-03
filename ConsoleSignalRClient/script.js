@@ -18,6 +18,8 @@ var registerButton = document.getElementById("registerButton");
 var joinRoomButton = document.getElementById("joinRoomButton");
 var removeMemberButton = document.getElementById("removeMemberButton");
 var removeMemberInput = document.getElementById("removeMemberInput");
+var createTemporaryRoomButton = document.getElementById("createTemporaryRoomButton");
+var roomDurationInput = document.getElementById("roomDuration");
 var memberActions = document.querySelector('.member-actions');
 
 var currentRoom = null;
@@ -41,7 +43,7 @@ deleteRoomButton.addEventListener("click", function () {
     deleteRoom();
 });
 
-registerButton.addEventListener("click", function () {
+registerButton.addEventListener("click", async () => {
     registerUser();
 });
 
@@ -52,6 +54,11 @@ joinRoomButton.addEventListener("click", function () {
 removeMemberButton.addEventListener("click", function () {
     removeMember();
 });
+
+createTemporaryRoomButton.addEventListener("click", function () {
+    createTemporaryRoom();
+});
+
 
 connection.on("ReceiveMessage", function (message) {
     var roomName = message.roomName;
@@ -100,6 +107,7 @@ connection.on("RoomDeleted", function (roomName) {
 });
 
 connection.on("AllRooms", function (rooms) {
+    roomList.innerHTML = "";
     rooms.forEach(function (room) {
         addRoomToList(room);
     });
@@ -112,12 +120,37 @@ connection.on("ReceiveExistingMessages", function (roomName, existingMessages) {
     }
 });
 
+connection.on("UserRegistered", async (username) => {
+    document.getElementById("registerRoomForm").style.display = "none";
+    document.getElementById("roomListContainer").style.display = "block";
+    document.getElementById("messageContainer").style.display = "block";
+    document.getElementById("roomContainer").style.display = "block";
+
+    document.getElementById("displayUsername").textContent = username;
+    document.getElementById("welcomeMessage").style.display = "block";
+    console.log(`${username} registered successfully.`);
+    await fetchRooms();
+});
+
+connection.on("UserAlreadyRegistered", async (username) => {
+    document.getElementById("registerRoomForm").style.display = "none";
+    document.getElementById("roomListContainer").style.display = "block";
+    document.getElementById("messageContainer").style.display = "block";
+    document.getElementById("roomContainer").style.display = "block";
+
+    document.getElementById("displayUsername").textContent = username;
+    document.getElementById("welcomeMessage").style.display = "block";
+    console.log(`${username} already registered.`);
+    await fetchRooms();
+});
+
 connection.on("ErrorMessage", function (errorMessage) {
     alert(errorMessage);
 });
 
 connection.start()
     .then(function () {
+        fetchRooms();
     })
     .catch(function (err) {
         console.error(err.toString());
@@ -128,16 +161,11 @@ connection.onclose(function () {
     alert("You have been disconnected from the server.");
 });
 
-function registerUser() {
-    var user = usernameInput.value;
-
-    if (connection.state === signalR.HubConnectionState.Connected && user) {
-        connection.invoke("RegisterUser", user)
-            .catch(function (err) {
-                console.error(err.toString());
-            });
-    } else {
-        console.error("Connection is not in 'Connected' state, or username is empty.");
+async function fetchRooms() {
+    try {
+        await connection.invoke("GetAllRooms");
+    } catch (err) {
+        console.error(err.toString());
     }
 }
 
@@ -154,6 +182,14 @@ function sendMessage() {
     } else {
         console.error("Connection is not in 'Connected' state, or no room selected, or username/message is empty.");
     }
+}
+
+async function registerUser(){
+    var username = usernameInput.value;
+    await connection.invoke("RegisterUser", username)
+        .catch(err => {
+            console.error(err.toString());
+        });
 }
 
 function joinRoom() {
@@ -186,6 +222,21 @@ function createRoom() {
             .then(function () {
                 joinRoomInternal(user, roomName);
             })
+            .catch(function (err) {
+                console.error(err.toString());
+            });
+    } else {
+        console.error("Connection is not in 'Connected' state, or username/room name is empty.");
+    }
+}
+
+function createTemporaryRoom() {
+    var user = usernameInput.value;
+    var timer = Number(roomDurationInput.value);
+    var roomName = roomNameInput.value;
+
+    if (connection.state === signalR.HubConnectionState.Connected && user && roomName && timer) {
+        connection.invoke("CreateTemporaryRoom", user, roomName, timer)
             .catch(function (err) {
                 console.error(err.toString());
             });
@@ -233,6 +284,8 @@ function removeMember() {
     if (connection.state === signalR.HubConnectionState.Connected && roomName && user && memberToRemove) {
         connection.invoke("RemoveMember", user, roomName, memberToRemove).then(function () {
             updateMemberList(roomName);
+            if(roomOwners[roomName] !== user)
+            displayMessages();
         })
             .catch(function (err) {
                 console.error(err.toString());
@@ -293,7 +346,7 @@ function addRoomToList(roomName) {
         return;
     }
 
-    var roomListItem = document.createElement("div");
+    var roomListItem = document.createElement("button");
     roomListItem.className = "roomListItem";
     roomListItem.textContent = roomName;
     roomListItem.id = roomName;

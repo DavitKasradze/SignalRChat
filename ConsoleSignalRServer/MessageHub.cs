@@ -17,8 +17,21 @@ namespace ConsoleSignalRServer
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.Caller.SendAsync("AllRooms", Rooms);
+            var connectionId = Context.ConnectionId;
+            var user = Users.FirstOrDefault(u => u.Value == connectionId).Key;
+
+            if (!string.IsNullOrEmpty(user))
+            {
+                await Clients.Caller.SendAsync("UserAlreadyRegistered", user);
+                await Clients.Caller.SendAsync("AllRooms", Rooms);
+            }
+
             await base.OnConnectedAsync();
+        }
+        
+        public async Task GetAllRooms()
+        {
+            await Clients.Caller.SendAsync("AllRooms", Rooms);
         }
 
         public async Task BroadcastRoomCreated(string roomName, string user)
@@ -113,6 +126,25 @@ namespace ConsoleSignalRServer
 
             await BroadcastRoomCreated(roomName, user);
         }
+        
+        public async Task CreateTemporaryRoom(string user, string roomName, int durationInMinutes)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
+            await Clients.Group(roomName).SendAsync("ReceiveMessage", "System", $"{roomName} room created for {durationInMinutes} minutes.");
+
+            await CreateRoom(user, roomName);
+            
+            await RemoveRoomAfterDelay(user, roomName, durationInMinutes);
+        }
+
+        private async Task RemoveRoomAfterDelay(string user, string roomName, int durationInMinutes)
+        {
+            await Task.Delay(TimeSpan.FromMinutes(durationInMinutes));
+            
+            await Clients.Group(roomName).SendAsync("ReceiveMessage", "System", $"{roomName} room is removed.");
+            
+            await DeleteRoom(user, roomName);
+        }
 
 
         public async Task DeleteRoom(string user, string roomName)
@@ -186,13 +218,13 @@ namespace ConsoleSignalRServer
         {
             if (Users.ContainsKey(user))
             {
-                await Clients.Caller.SendAsync("ErrorMessage",
-                    "Username already exists. Please choose a different username.");
-                return;
+                await Clients.Caller.SendAsync("UserAlreadyRegistered", user);
             }
-
-            Users.TryAdd(user, Context.ConnectionId);
-            await Clients.Caller.SendAsync("UserRegistered", user);
+            else
+            {
+                Users.TryAdd(user, Context.ConnectionId);
+                await Clients.Caller.SendAsync("UserRegistered", user);
+            }
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)

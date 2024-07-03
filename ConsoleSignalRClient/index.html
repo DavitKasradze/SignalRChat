@@ -15,27 +15,37 @@
             margin: 0;
             background-color: #f0f0f0;
         }
-        #roomListContainer, #messageContainer, #joinRoomForm {
+        #welcomeMessage {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
             background-color: #fff;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        #roomListContainer, #messageContainer, #registerRoomForm, #roomContainer {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
         #roomListContainer {
             width: 250px;
-            margin-right: 20px;
+            max-width: 100%; 
         }
         #messageContainer {
-            flex-grow: 1;
             max-width: 600px;
+            width: 100%; 
         }
-        #messageList {
-            max-height: 400px; /* Adjust height as per your design */
+        #messageList, #memberList {
+            max-height: 200px; 
             overflow-y: auto;
-        }
-        #memberList {
-            max-height: 170px; /* Adjust height as per your design */
-            overflow-y: auto;
+            margin-top: 10px;
+            padding: 0;
         }
         h2 {
             margin-top: 0;
@@ -43,18 +53,21 @@
         }
         .input-group {
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
         }
         .input-group label {
             font-weight: bold;
+            margin-right: 10px;
         }
-        .input-group input[type="text"] {
+        input[type="text"] {
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             width: 200px;
             margin-left: 10px;
         }
-        .input-group button {
+        button {
             padding: 8px 16px;
             border: none;
             background-color: #007bff;
@@ -62,13 +75,14 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        .input-group button:disabled {
+        button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
         ul {
             list-style-type: none;
             padding: 0;
+            margin: 0;
         }
         li {
             margin-bottom: 8px;
@@ -88,11 +102,14 @@
     </style>
 </head>
 <body>
-<div id="roomListContainer">
+<div id="welcomeMessage" style="display: none;">
+    <h2>Welcome, <span id="displayUsername"></span>!</h2>
+</div>
+<div id="roomListContainer" style="display: none;">
     <h2>Rooms</h2>
     <div id="roomList"></div>
 </div>
-<div id="messageContainer">
+<div id="messageContainer" style="display: none;">
     <h2 id="currentRoomName">No Room Selected</h2>
     <div class="input-group">
         <input type="text" id="messageInput" placeholder="Type your message..." disabled>
@@ -100,7 +117,7 @@
     </div>
     <ul id="messageList"></ul>
     <h2>Members</h2>
-    <ul id="memberList"></ul> <!-- Display members of the current room -->
+    <ul id="memberList"></ul>
     <div class="member-actions" style="display: none;">
         <label for="removeMemberInput">Remove Member:</label>
         <input type="text" id="removeMemberInput" placeholder="Enter member's username...">
@@ -110,21 +127,23 @@
         <button id="joinRoomButton">Join Room</button>
     </div>
 </div>
-
-<div id="joinRoomForm">
+<div id="registerRoomForm">
     <div class="input-group">
         <label for="username">Username:</label>
         <input type="text" id="username" placeholder="Enter your username...">
-        <button id="registerButton">Register</button>
+        <button id="registerButton">Enter</button>
     </div>
+</div>
+<div id="roomContainer" style="display: none;">
     <div class="input-group">
         <label for="roomName">Room Name:</label>
         <input type="text" id="roomName" placeholder="Enter room name...">
         <button id="createRoomButton">Create Room</button>
         <button id="deleteRoomButton">Delete Room</button>
+        <input type="number" id="roomDuration" placeholder="Duration (minutes)">
+        <button id="createTemporaryRoomButton">Create Temporary Room</button>
     </div>
 </div>
-
 <script src="script.js"></script>
 </body>
 </html>
