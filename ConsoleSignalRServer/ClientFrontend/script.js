@@ -99,7 +99,7 @@ connection.on("RoomDeleted", async function (roomName) {
     if (currentRoom === roomName) {
         currentRoom = null;
         currentRoomName.textContent = "";
-        messageList.innerHTML = ""; 
+        messageList.innerHTML = "";
         memberList.innerHTML = "";
         memberActions.style.display = 'none';
     }
@@ -177,6 +177,9 @@ function sendMessage() {
 
     if (connection.state === signalR.HubConnectionState.Connected && roomName && user && message) {
         connection.invoke("SendMessageToRoom", roomName, user, message)
+            .then(async function () {
+                messageInput.value = '';
+            })
             .catch(function (err) {
                 console.error(err.toString());
             });
@@ -222,8 +225,9 @@ async function createRoom() {
         connection.invoke("CreateRoom", user, roomName)
             .then(async function () {
                 await joinRoomInternal(user, roomName);
-                await updateMemberList();
-                await displayMessages();
+                await updateMemberList(roomName);
+                await displayMessages(roomName);
+                roomNameInput.value = '';
             })
             .catch(function (err) {
                 console.error(err.toString());
@@ -241,9 +245,11 @@ async function createTemporaryRoom() {
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName && timer) {
         connection.invoke("CreateRoom", user, roomName).then(async function () {
             await joinRoomInternal(user, roomName);
-            await updateMemberList();
-            await displayMessages();
-            await scheduleRoomRemoval(user, roomName, timer);
+            await updateMemberList(roomName);
+            await displayMessages(roomName);
+            await scheduledRoomRemoval(user, roomName, timer);
+            roomDurationInput.value = '';
+            roomNameInput.value = '';
         })
             .catch(function (err) {
                 console.error(err.toString());
@@ -276,6 +282,11 @@ function deleteRoom() {
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("DeleteRoom", user, roomName)
+            .then(async function () {
+                joinRoomButtonContainer.style.display = "none";
+                messageInput.disabled = true;
+                sendButton.disabled = true;
+            })
             .catch(function (err) {
                 console.error(err.toString());
             });
@@ -292,6 +303,7 @@ async function removeMember() {
     if (connection.state === signalR.HubConnectionState.Connected && roomName && user && memberToRemove) {
         await connection.invoke("RemoveMember", user, roomName, memberToRemove).then(async function () {
             await updateMemberList(roomName);
+            removeMemberInput.value = '';
         })
             .catch(function (err) {
                 console.error(err.toString());
@@ -367,12 +379,12 @@ async function switchRoomUI(roomName) {
     currentRoom = roomName;
     currentRoomName.textContent = roomName;
     await clearMessages();
-    await displayJoinRoomButton();
-
+    joinRoomButtonContainer.style.display = "block";
+    
     var user = usernameInput.value;
 
 
-    if (roomOwners[roomName] === user || (members[roomName] && members[roomName].includes(user))) {
+    if (roomOwners[roomName] === user) {
         joinRoomInternal(user, roomName);
     } else {
         var isJoined = members[currentRoom] && members[currentRoom].includes(usernameInput.value);
@@ -383,10 +395,6 @@ async function switchRoomUI(roomName) {
 
 function clearMessages() {
     messageList.innerHTML = '';
-}
-
-function displayJoinRoomButton() {
-    joinRoomButtonContainer.style.display = "block";
 }
 
 async function removeRoomFromList(roomName) {
@@ -450,11 +458,11 @@ function updateUIOnRoomSelection(user, roomName) {
     }
 }
 
-async function scheduleRoomRemoval(user, roomName, durationInMinutes) {
+async function scheduledRoomRemoval(user, roomName, durationInMinutes) {
     try {
-        await connection.invoke("RemoveRoomAfterDelay", user, roomName, durationInMinutes);
+        await connection.invoke("ScheduledRoomRemoval", user, roomName, durationInMinutes);
     } catch (error) {
-        console.error(error.toString());
+        console.error("Error scheduling room deletion: ", error);
     }
 }
 

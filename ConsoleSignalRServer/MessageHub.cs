@@ -1,21 +1,28 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
+using System;
+using System.Timers;
+using ConsoleSignalRServer.HubServices;
 
 namespace ConsoleSignalRServer
 {
     public class MessageHub : Hub
     {
+        private readonly RoomDeletionService _roomDeletionService;
         private static readonly ConcurrentDictionary<string, List<string>> RoomMessages = new();
         private static readonly ConcurrentDictionary<string, string> RoomOwners = new();
         private static readonly ConcurrentDictionary<string, List<string>> RoomMembers = new();
         private static readonly List<string> Rooms = new();
         private static readonly ConcurrentDictionary<string, string> Users = new();
         
+        public MessageHub(RoomDeletionService roomDeletionService)
+        {
+            _roomDeletionService = roomDeletionService;
+        }
+
         public override async Task OnConnectedAsync()
         {
             var connectionId = Context.ConnectionId;
@@ -152,19 +159,14 @@ namespace ConsoleSignalRServer
             }
         }
 
-        public Task RemoveRoomAfterDelay(string user, string roomName, int durationInMinutes)
+        public async Task ScheduledRoomRemoval(string user, string roomName, int durationInMinutes)
         {
-            Timer timer = null;
-            timer = new Timer((state) =>
-            {
-                if (!Rooms.Contains(roomName)) 
-                    return;
-                
-                _ = DeleteRoom(user, roomName);
-
-                timer?.DisposeAsync();
-            }, null, TimeSpan.FromMinutes(durationInMinutes), Timeout.InfiniteTimeSpan);
-            return Task.CompletedTask;
+            await _roomDeletionService.ScheduledRoomRemoval(user, roomName, durationInMinutes);
+        }
+        
+        public static Task<bool> RoomExists(string roomName)
+        {
+            return Task.FromResult(Rooms.Contains(roomName));
         }
         
         public async Task RemoveMember(string owner, string roomName, string memberToRemove)
@@ -233,7 +235,6 @@ namespace ConsoleSignalRServer
                     await Clients.Group(roomName).SendAsync("ReceiveMessage",
                         new { RoomName = roomName, Content = $"{connectionId} has left the room." });
                     await Clients.Group(roomName).SendAsync("ReceiveRoomMember", roomName, members);
-                    break;
                 }
             }
 
