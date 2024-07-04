@@ -16,17 +16,16 @@
             background-color: #f0f0f0;
         }
         #welcomeMessage {
+            position: fixed;
+            top: 5px;
             display: flex;
             justify-content: center;
             align-items: baseline;
-            background-color: #fff;
-            border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             flex-direction: column;
         }
-        #roomListContainer, #messageContainer, #registerRoomForm, #roomContainer {
+        #roomListContainer, #messageContainer, #registerRoomForm, #roomContainer, #temporaryRoomContainer {
             background-color: #fff;
             border-radius: 8px;
             padding: 20px;
@@ -34,18 +33,38 @@
             margin-bottom: 20px;
         }
         #roomListContainer {
+            position: fixed;
+            left: 50px;
             width: 250px;
             max-width: 100%; 
         }
         #messageContainer {
-            max-width: 600px;
+            position: fixed;
+            right: 750px;
+            max-width: 1350px;
             width: 100%; 
         }
-        #messageList, #memberList {
-            max-height: 200px; 
+        #messageList {
+            max-height: 600px; 
             overflow-y: auto;
             margin-top: 10px;
             padding: 0;
+        }
+        #memberList{
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding: 0;
+        }
+        #roomContainer{
+            position: fixed;
+            right: 50px;
+            bottom: 600px;
+        }
+        #temporaryRoomContainer{
+            position: fixed;
+            right: 263px;
+            bottom: 500px;
         }
         h2 {
             margin-top: 0;
@@ -69,6 +88,7 @@
         }
         button {
             padding: 8px 16px;
+            margin: 5px;
             border: none;
             background-color: #007bff;
             color: #fff;
@@ -103,7 +123,7 @@
 </head>
 <body>
 <div id="welcomeMessage" style="display: none;">
-    <h2>Welcome, <span id="displayUsername"></span>!</h2>
+    <h1>Welcome, <span id="displayUsername"></span>!</h1>
 </div>
 <div id="roomListContainer" style="display: none;">
     <h2>Rooms</h2>
@@ -111,11 +131,11 @@
 </div>
 <div id="messageContainer" style="display: none;">
     <h2 id="currentRoomName">No Room Selected</h2>
+    <ul id="messageList"></ul>
     <div class="input-group">
         <input type="text" id="messageInput" placeholder="Type your message..." disabled>
         <button id="sendButton" disabled>Send</button>
     </div>
-    <ul id="messageList"></ul>
     <h2>Members</h2>
     <ul id="memberList"></ul>
     <div class="member-actions" style="display: none;">
@@ -140,6 +160,10 @@
         <input type="text" id="roomName" placeholder="Enter room name...">
         <button id="createRoomButton">Create Room</button>
         <button id="deleteRoomButton">Delete Room</button>
+    </div>
+</div>
+<div id="temporaryRoomContainer" style="display: none;">
+    <div class="input-group">
         <input type="number" id="roomDuration" placeholder="Duration (minutes)">
         <button id="createTemporaryRoomButton">Create Temporary Room</button>
     </div>

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
@@ -14,7 +15,7 @@ namespace ConsoleSignalRServer
         private static readonly ConcurrentDictionary<string, List<string>> RoomMembers = new();
         private static readonly List<string> Rooms = new();
         private static readonly ConcurrentDictionary<string, string> Users = new();
-
+        
         public override async Task OnConnectedAsync()
         {
             var connectionId = Context.ConnectionId;
@@ -28,7 +29,7 @@ namespace ConsoleSignalRServer
 
             await base.OnConnectedAsync();
         }
-        
+
         public async Task GetAllRooms()
         {
             await Clients.Caller.SendAsync("AllRooms", Rooms);
@@ -47,7 +48,7 @@ namespace ConsoleSignalRServer
                 await Clients.Caller.SendAsync("ErrorMessage", "You are not a member of this room.");
                 return;
             }
-            
+
             var fullMessage = $"{user}: {message}";
 
             if (!RoomMessages.TryGetValue(roomName, out var messages))
@@ -79,14 +80,13 @@ namespace ConsoleSignalRServer
                 RoomOwners.TryAdd(roomName, user);
                 RoomMessages.TryAdd(roomName, new List<string>());
                 RoomMembers.TryAdd(roomName, new List<string>());
-                await Clients.All.SendAsync("RoomCreated", roomName);
             }
 
             if (RoomMembers.TryGetValue(roomName, out var members) && !members.Contains(user))
             {
                 members.Add(user);
             }
-            
+
             var systemMessage = $"{user} has joined the room.";
             RoomMessages[roomName].Add(systemMessage);
             await Clients.Group(roomName)
@@ -96,7 +96,7 @@ namespace ConsoleSignalRServer
             await Clients.Group(roomName).SendAsync("ReceiveRoomMember", roomName, members);
             await Clients.Caller.SendAsync("ReceiveExistingMessages", roomName, RoomMessages[roomName]);
         }
-
+        
         public async Task CreateRoom(string user, string roomName)
         {
             if (!Users.ContainsKey(user))
@@ -119,33 +119,12 @@ namespace ConsoleSignalRServer
             RoomMembers.TryAdd(roomName, new List<string> { user });
 
             await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-            await Clients.All.SendAsync("RoomCreated", roomName);
-            await Clients.Caller.SendAsync("RoomJoined", roomName, user); 
+            await Clients.Caller.SendAsync("RoomJoined", roomName, user);
             await Clients.Caller.SendAsync("ReceiveExistingMessages", roomName, RoomMessages[roomName]);
             await Clients.Group(roomName).SendAsync("ReceiveRoomMember", roomName, RoomMembers[roomName]);
 
             await BroadcastRoomCreated(roomName, user);
         }
-        
-        public async Task CreateTemporaryRoom(string user, string roomName, int durationInMinutes)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-            await Clients.Group(roomName).SendAsync("ReceiveMessage", "System", $"{roomName} room created for {durationInMinutes} minutes.");
-
-            await CreateRoom(user, roomName);
-            
-            await RemoveRoomAfterDelay(user, roomName, durationInMinutes);
-        }
-
-        private async Task RemoveRoomAfterDelay(string user, string roomName, int durationInMinutes)
-        {
-            await Task.Delay(TimeSpan.FromMinutes(durationInMinutes));
-            
-            await Clients.Group(roomName).SendAsync("ReceiveMessage", "System", $"{roomName} room is removed.");
-            
-            await DeleteRoom(user, roomName);
-        }
-
 
         public async Task DeleteRoom(string user, string roomName)
         {
@@ -173,6 +152,21 @@ namespace ConsoleSignalRServer
             }
         }
 
+        public Task RemoveRoomAfterDelay(string user, string roomName, int durationInMinutes)
+        {
+            Timer timer = null;
+            timer = new Timer((state) =>
+            {
+                if (!Rooms.Contains(roomName)) 
+                    return;
+                
+                _ = DeleteRoom(user, roomName);
+
+                timer?.DisposeAsync();
+            }, null, TimeSpan.FromMinutes(durationInMinutes), Timeout.InfiniteTimeSpan);
+            return Task.CompletedTask;
+        }
+        
         public async Task RemoveMember(string owner, string roomName, string memberToRemove)
         {
             if (RoomOwners.TryGetValue(roomName, out var roomOwner) && roomOwner == owner)
@@ -180,17 +174,17 @@ namespace ConsoleSignalRServer
                 if (RoomMembers.TryGetValue(roomName, out var members) && members.Contains(memberToRemove))
                 {
                     members.Remove(memberToRemove);
-                    
+
                     if (RoomMessages.TryGetValue(roomName, out var messages))
                     {
                         messages.RemoveAll(msg => msg.StartsWith(memberToRemove));
                     }
-                    
+
                     var systemMessage = $"{memberToRemove} has been removed from the room.";
                     RoomMessages[roomName].Add(systemMessage);
                     await Clients.Group(roomName).SendAsync("ReceiveMessage",
                         new { RoomName = roomName, Content = systemMessage });
-                    
+
                     if (Users.TryGetValue(memberToRemove, out var memberConnectionId))
                     {
                         await Groups.RemoveFromGroupAsync(memberConnectionId, roomName);

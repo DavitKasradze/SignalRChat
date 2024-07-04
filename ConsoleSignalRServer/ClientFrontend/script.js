@@ -20,6 +20,7 @@ var removeMemberButton = document.getElementById("removeMemberButton");
 var removeMemberInput = document.getElementById("removeMemberInput");
 var createTemporaryRoomButton = document.getElementById("createTemporaryRoomButton");
 var roomDurationInput = document.getElementById("roomDuration");
+var joinRoomButtonContainer = document.getElementById("joinRoomButtonContainer")
 var memberActions = document.querySelector('.member-actions');
 
 var currentRoom = null;
@@ -31,36 +32,36 @@ messageInput.disabled = true;
 sendButton.disabled = true;
 
 
-sendButton.addEventListener("click", function () {
-    sendMessage();
+sendButton.addEventListener("click", async function () {
+    await sendMessage();
 });
 
-createRoomButton.addEventListener("click", function () {
-    createRoom();
+createRoomButton.addEventListener("click", async function () {
+    await createRoom();
 });
 
-deleteRoomButton.addEventListener("click", function () {
-    deleteRoom();
+deleteRoomButton.addEventListener("click", async function () {
+    await deleteRoom();
 });
 
 registerButton.addEventListener("click", async () => {
-    registerUser();
+    await registerUser();
 });
 
-joinRoomButton.addEventListener("click", function () {
-    joinRoom();
+joinRoomButton.addEventListener("click", async function () {
+    await joinRoom();
 });
 
-removeMemberButton.addEventListener("click", function () {
-    removeMember();
+removeMemberButton.addEventListener("click", async function () {
+    await removeMember();
 });
 
-createTemporaryRoomButton.addEventListener("click", function () {
-    createTemporaryRoom();
+createTemporaryRoomButton.addEventListener("click", async function () {
+    await createTemporaryRoom();
 });
 
 
-connection.on("ReceiveMessage", function (message) {
+connection.on("ReceiveMessage", async function (message) {
     var roomName = message.roomName;
     var content = message.content;
 
@@ -70,37 +71,35 @@ connection.on("ReceiveMessage", function (message) {
     messages[roomName].push(content);
 
     if (roomName === currentRoom) {
-        displayMessages(roomName);
+        await displayMessages(roomName);
     }
 });
 
-connection.on("RoomCreated", function (roomName, owner) {
-    addRoomToList(roomName);
+connection.on("RoomCreated", async function (roomName, owner) {
+    await addRoomToList(roomName);
+    alert(`Room "${roomName}" created by ${owner}`);
     members[roomName] = [];
-    updateMemberList(roomName);
+    await updateMemberList(roomName);
     roomOwners[roomName] = owner;
-    updateUIOnRoomSelection(usernameInput.value, roomName);
-
-    if (owner) {
-        alert(`Room "${roomName}" created by ${owner}`);
-    }
+    await updateUIOnRoomSelection(usernameInput.value, roomName);
 });
 
 
-connection.on("ReceiveRoomMember", function (roomName, roomMembers) {
+connection.on("ReceiveRoomMember", async function (roomName, roomMembers) {
     members[roomName] = roomMembers;
-    updateMemberList(roomName);
+    await updateMemberList(roomName);
     if (!roomOwners[roomName] && roomMembers.length > 0) {
         roomOwners[roomName] = roomMembers[0];
     }
 });
 
-connection.on("RoomDeleted", function (roomName) {
-    removeRoomFromList(roomName);
+connection.on("RoomDeleted", async function (roomName) {
+    await removeRoomFromList(roomName);
+
     if (currentRoom === roomName) {
         currentRoom = null;
         currentRoomName.textContent = "";
-        messageList.innerHTML = "";
+        messageList.innerHTML = ""; 
         memberList.innerHTML = "";
         memberActions.style.display = 'none';
     }
@@ -113,10 +112,10 @@ connection.on("AllRooms", function (rooms) {
     });
 });
 
-connection.on("ReceiveExistingMessages", function (roomName, existingMessages) {
+connection.on("ReceiveExistingMessages", async function (roomName, existingMessages) {
     messages[roomName] = existingMessages;
     if (roomName === currentRoom) {
-        displayMessages(roomName);
+        await displayMessages(roomName);
     }
 });
 
@@ -125,6 +124,7 @@ connection.on("UserRegistered", async (username) => {
     document.getElementById("roomListContainer").style.display = "block";
     document.getElementById("messageContainer").style.display = "block";
     document.getElementById("roomContainer").style.display = "block";
+    document.getElementById("temporaryRoomContainer").style.display = "block";
 
     document.getElementById("displayUsername").textContent = username;
     document.getElementById("welcomeMessage").style.display = "block";
@@ -137,6 +137,7 @@ connection.on("UserAlreadyRegistered", async (username) => {
     document.getElementById("roomListContainer").style.display = "block";
     document.getElementById("messageContainer").style.display = "block";
     document.getElementById("roomContainer").style.display = "block";
+    document.getElementById("temporaryRoomContainer").style.display = "block";
 
     document.getElementById("displayUsername").textContent = username;
     document.getElementById("welcomeMessage").style.display = "block";
@@ -149,8 +150,8 @@ connection.on("ErrorMessage", function (errorMessage) {
 });
 
 connection.start()
-    .then(function () {
-        fetchRooms();
+    .then(async function () {
+        await fetchRooms();
     })
     .catch(function (err) {
         console.error(err.toString());
@@ -184,7 +185,7 @@ function sendMessage() {
     }
 }
 
-async function registerUser(){
+async function registerUser() {
     var username = usernameInput.value;
     await connection.invoke("RegisterUser", username)
         .catch(err => {
@@ -198,12 +199,12 @@ function joinRoom() {
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("JoinRoom", user, roomName)
-            .then(function () {
+            .then(async function () {
                 messageInput.disabled = false;
                 sendButton.disabled = false;
-                addRoomToList(roomName);
-                switchRoom(roomName);
-                updateUIOnRoomSelection(user, roomName);
+                await addRoomToList(roomName);
+                await switchRoom(roomName);
+                await updateUIOnRoomSelection(user, roomName);
             })
             .catch(function (err) {
                 console.error(err.toString());
@@ -213,14 +214,16 @@ function joinRoom() {
     }
 }
 
-function createRoom() {
+async function createRoom() {
     var user = usernameInput.value;
     var roomName = roomNameInput.value;
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("CreateRoom", user, roomName)
-            .then(function () {
-                joinRoomInternal(user, roomName);
+            .then(async function () {
+                await joinRoomInternal(user, roomName);
+                await updateMemberList();
+                await displayMessages();
             })
             .catch(function (err) {
                 console.error(err.toString());
@@ -230,13 +233,18 @@ function createRoom() {
     }
 }
 
-function createTemporaryRoom() {
+async function createTemporaryRoom() {
     var user = usernameInput.value;
     var timer = Number(roomDurationInput.value);
     var roomName = roomNameInput.value;
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName && timer) {
-        connection.invoke("CreateTemporaryRoom", user, roomName, timer)
+        connection.invoke("CreateRoom", user, roomName).then(async function () {
+            await joinRoomInternal(user, roomName);
+            await updateMemberList();
+            await displayMessages();
+            await scheduleRoomRemoval(user, roomName, timer);
+        })
             .catch(function (err) {
                 console.error(err.toString());
             });
@@ -247,14 +255,14 @@ function createTemporaryRoom() {
 
 function joinRoomInternal(user, roomName) {
     connection.invoke("JoinRoom", user, roomName)
-        .then(function () {
+        .then(async function () {
             currentRoom = roomName;
             currentRoomName.textContent = roomName;
             messageInput.disabled = false;
             sendButton.disabled = false;
-            addRoomToList(roomName);
-            switchRoom(roomName);
-            updateUIOnRoomSelection(user, roomName);
+            await addRoomToList(roomName);
+            await switchRoom(roomName);
+            await updateUIOnRoomSelection(user, roomName);
         })
         .catch(function (err) {
             console.error(err.toString());
@@ -276,16 +284,14 @@ function deleteRoom() {
     }
 }
 
-function removeMember() {
+async function removeMember() {
     var user = usernameInput.value;
     var roomName = currentRoom;
     var memberToRemove = removeMemberInput.value;
 
     if (connection.state === signalR.HubConnectionState.Connected && roomName && user && memberToRemove) {
-        connection.invoke("RemoveMember", user, roomName, memberToRemove).then(function () {
-            updateMemberList(roomName);
-            if(roomOwners[roomName] !== user)
-            displayMessages();
+        await connection.invoke("RemoveMember", user, roomName, memberToRemove).then(async function () {
+            await updateMemberList(roomName);
         })
             .catch(function (err) {
                 console.error(err.toString());
@@ -295,15 +301,15 @@ function removeMember() {
     }
 }
 
-function switchRoom(roomName) {
+async function switchRoom(roomName) {
     currentRoom = roomName;
     currentRoomName.textContent = roomName;
-    displayMessages(roomName);
-    updateMemberList(roomName);
-    updateUIOnRoomSelection(usernameInput.value, roomName);
+    await displayMessages(roomName);
+    await updateMemberList(roomName);
+    await updateUIOnRoomSelection(usernameInput.value, roomName);
 
     var isJoined = members[currentRoom] && members[currentRoom].includes(usernameInput.value);
-    document.getElementById("joinRoomButtonContainer").style.display = isJoined ? "none" : "block";
+    joinRoomButtonContainer.style.display = isJoined ? "none" : "block";
 }
 
 
@@ -350,18 +356,18 @@ function addRoomToList(roomName) {
     roomListItem.className = "roomListItem";
     roomListItem.textContent = roomName;
     roomListItem.id = roomName;
-    roomListItem.onclick = function () {
-        switchRoomUI(roomName);
+    roomListItem.onclick = async function () {
+        await switchRoomUI(roomName);
     };
     roomList.appendChild(roomListItem);
 }
 
 
-function switchRoomUI(roomName) {
+async function switchRoomUI(roomName) {
     currentRoom = roomName;
     currentRoomName.textContent = roomName;
-    clearMessages();
-    displayJoinRoomButton();
+    await clearMessages();
+    await displayJoinRoomButton();
 
     var user = usernameInput.value;
 
@@ -370,7 +376,7 @@ function switchRoomUI(roomName) {
         joinRoomInternal(user, roomName);
     } else {
         var isJoined = members[currentRoom] && members[currentRoom].includes(usernameInput.value);
-        document.getElementById("joinRoomButtonContainer").style.display = isJoined ? "none" : "block";
+        joinRoomButtonContainer.style.display = isJoined ? "none" : "block";
     }
 }
 
@@ -380,14 +386,13 @@ function clearMessages() {
 }
 
 function displayJoinRoomButton() {
-    var joinRoomButtonContainer = document.getElementById("joinRoomButtonContainer");
     joinRoomButtonContainer.style.display = "block";
 }
 
-function removeRoomFromList(roomName) {
+async function removeRoomFromList(roomName) {
     var roomListItem = document.getElementById(roomName);
     if (roomListItem) {
-        roomListItem.remove();
+        await roomListItem.remove();
     }
 
     if (currentRoom === roomName) {
@@ -442,6 +447,14 @@ function updateUIOnRoomSelection(user, roomName) {
         memberActions.style.display = 'block';
     } else {
         memberActions.style.display = 'none';
+    }
+}
+
+async function scheduleRoomRemoval(user, roomName, durationInMinutes) {
+    try {
+        await connection.invoke("RemoveRoomAfterDelay", user, roomName, durationInMinutes);
+    } catch (error) {
+        console.error(error.toString());
     }
 }
 
