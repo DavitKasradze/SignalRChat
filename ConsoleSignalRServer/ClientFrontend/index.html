@@ -13,7 +13,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            background-color: #003859;
         }
         #welcomeMessage {
             position: fixed;
@@ -32,39 +32,101 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
+        #temporaryRoomContainer {
+            background-color: #0a2231;
+            color: white;
+        }
+        #registerRoomForm {
+            background-color: #0a2231;
+            color: white;
+        }
+        #roomContainer {
+            background-color: #0a2231;
+            color: white;
+        }
         #roomListContainer {
             position: fixed;
-            left: 50px;
-            width: 250px;
-            max-width: 100%; 
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 14%;
+            max-width: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background-color: #0a2231;
+            color: white;
+            margin-bottom: 0;
+        }
+        #roomList {
+            padding: 0;
+            list-style-type: none;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        #roomList li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            white-space: nowrap; /* Prevent wrapping of text */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Show ellipsis for overflow text */
+            cursor: pointer; /* Add cursor pointer for interactive feel */
+            background-color: #003859;
+        }
+        #roomList li.owner {
+            color: red;
+        }
+        #roomList li.member {
+            color: blue;
         }
         #messageContainer {
             position: fixed;
-            right: 750px;
-            max-width: 1350px;
-            width: 100%; 
+            left: 15%; /* Align to the right of roomListContainer */
+            top: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: #1a1d21;
+            color: white;
+            overflow-y: hidden; /* Adjust overflow behavior as needed */
+            margin-bottom: 0;
         }
         #messageList {
-            max-height: 600px; 
+            flex: 1; /* Take remaining space */
+            max-height: calc(100% - 100px); /* Adjusted max height for scrolling */
             overflow-y: auto;
             margin-top: 10px;
             padding: 0;
-        }
-        #memberList{
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
+            list-style-type: none;
             padding: 0;
+            margin: 0;
         }
-        #roomContainer{
-            position: fixed;
-            right: 50px;
-            bottom: 600px;
+        #messageList li {
+            max-width: 80%;
+            word-wrap: break-word;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1); /* Adjusted background color for messages */
         }
-        #temporaryRoomContainer{
-            position: fixed;
-            right: 263px;
-            bottom: 500px;
+        #messageList li.user-message {
+            align-self: flex-end;
+            background-color: #003859; /* Adjusted background color for user messages */
+        }
+        #messageList li.other-message {
+            align-self: flex-start;
+            background-color: rgba(255, 255, 255, 0.3); /* Adjusted background color for other messages */
+        }
+        #memberList {
+            max-height: 100px; /* Adjusted height for member list */
+            overflow-y: auto;
+            padding: 10px;
+            list-style-type: none;
+            margin: 10px 0;
         }
         h2 {
             margin-top: 0;
@@ -79,21 +141,26 @@
             font-weight: bold;
             margin-right: 10px;
         }
-        input[type="text"] {
+        input[type="text"], input[type="number"] {
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             width: 200px;
-            margin-left: 10px;
+            margin-left: 0;
+            background-color: #222529;
+            color: white;
         }
         button {
             padding: 8px 16px;
             margin: 5px;
             border: none;
-            background-color: #007bff;
+            background-color: #003859;
             color: #fff;
             border-radius: 4px;
             cursor: pointer;
+        }
+        button:hover {
+            background-color: #36637d;
         }
         button:disabled {
             background-color: #ccc;
@@ -107,14 +174,14 @@
         li {
             margin-bottom: 8px;
             padding: 8px;
-            background-color: #f9f9f9;
+            color: white;
             border-radius: 4px;
         }
         li.owner {
-            color: red;
+            background-color: #003859;
         }
         li.member {
-            color: blue;
+            background-color: #1a1d21;
         }
         .member-actions {
             margin-top: 10px;
@@ -122,13 +189,32 @@
     </style>
 </head>
 <body>
-<div id="welcomeMessage" style="display: none;">
-    <h1>Welcome, <span id="displayUsername"></span>!</h1>
-</div>
+<!--<div id="welcomeMessage" style="display: none;">-->
+<!--    <h1>Welcome, <span id="displayUsername"></span>!</h1>-->
+<!--</div>-->
 <div id="roomListContainer" style="display: none;">
     <h2>Rooms</h2>
     <div id="roomList"></div>
+    <button id="openRoomContainerButton">Manage Rooms</button>
 </div>
+
+<div id="roomContainer" style="display: none;">
+    <div class="input-group">
+        <label for="roomName"></label>
+        <input type="text" id="roomName" placeholder="Enter room name...">
+        <button id="createRoomButton">Create</button>
+        <button id="deleteRoomButton">Delete</button>
+    </div>
+</div>
+
+<div id="temporaryRoomContainer" style="display: none;">
+    <div class="input-group">
+        <h2>Temporary Room</h2>
+        <input type="number" id="roomDuration" placeholder="Duration (minutes)">
+        <button id="createTemporaryRoomButton">Enter</button>
+    </div>
+</div>
+
 <div id="messageContainer" style="display: none;">
     <h2 id="currentRoomName">No Room Selected</h2>
     <ul id="messageList"></ul>
@@ -149,23 +235,9 @@
 </div>
 <div id="registerRoomForm">
     <div class="input-group">
-        <label for="username">Username:</label>
+        <label for="username"></label>
         <input type="text" id="username" placeholder="Enter your username...">
         <button id="registerButton">Enter</button>
-    </div>
-</div>
-<div id="roomContainer" style="display: none;">
-    <div class="input-group">
-        <label for="roomName">Room Name:</label>
-        <input type="text" id="roomName" placeholder="Enter room name...">
-        <button id="createRoomButton">Create Room</button>
-        <button id="deleteRoomButton">Delete Room</button>
-    </div>
-</div>
-<div id="temporaryRoomContainer" style="display: none;">
-    <div class="input-group">
-        <input type="number" id="roomDuration" placeholder="Duration (minutes)">
-        <button id="createTemporaryRoomButton">Create Temporary Room</button>
     </div>
 </div>
 <script src="script.js"></script>

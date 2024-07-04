@@ -21,6 +21,9 @@ var removeMemberInput = document.getElementById("removeMemberInput");
 var createTemporaryRoomButton = document.getElementById("createTemporaryRoomButton");
 var roomDurationInput = document.getElementById("roomDuration");
 var joinRoomButtonContainer = document.getElementById("joinRoomButtonContainer")
+const openRoomContainerButton = document.getElementById('openRoomContainerButton');
+const roomContainer = document.getElementById('roomContainer');
+const temporaryRoomContainer = document.getElementById('temporaryRoomContainer');
 var memberActions = document.querySelector('.member-actions');
 
 var currentRoom = null;
@@ -58,6 +61,10 @@ removeMemberButton.addEventListener("click", async function () {
 
 createTemporaryRoomButton.addEventListener("click", async function () {
     await createTemporaryRoom();
+});
+
+openRoomContainerButton.addEventListener('click', function() {
+    displayRoomContainer();
 });
 
 
@@ -121,26 +128,22 @@ connection.on("ReceiveExistingMessages", async function (roomName, existingMessa
 
 connection.on("UserRegistered", async (username) => {
     document.getElementById("registerRoomForm").style.display = "none";
-    document.getElementById("roomListContainer").style.display = "block";
-    document.getElementById("messageContainer").style.display = "block";
-    document.getElementById("roomContainer").style.display = "block";
-    document.getElementById("temporaryRoomContainer").style.display = "block";
+    document.getElementById("roomListContainer").style.display = "flex";
+    document.getElementById("messageContainer").style.display = "flex";
 
-    document.getElementById("displayUsername").textContent = username;
-    document.getElementById("welcomeMessage").style.display = "block";
+    // document.getElementById("displayUsername").textContent = username.toUpperCase();
+    // document.getElementById("welcomeMessage").style.display = "flex";
     console.log(`${username} registered successfully.`);
     await fetchRooms();
 });
 
 connection.on("UserAlreadyRegistered", async (username) => {
     document.getElementById("registerRoomForm").style.display = "none";
-    document.getElementById("roomListContainer").style.display = "block";
-    document.getElementById("messageContainer").style.display = "block";
-    document.getElementById("roomContainer").style.display = "block";
-    document.getElementById("temporaryRoomContainer").style.display = "block";
+    document.getElementById("roomListContainer").style.display = "flex";
+    document.getElementById("messageContainer").style.display = "flex";
 
-    document.getElementById("displayUsername").textContent = username;
-    document.getElementById("welcomeMessage").style.display = "block";
+    // document.getElementById("displayUsername").textContent = username.toUpperCase();
+    // document.getElementById("welcomeMessage").style.display = "flex";
     console.log(`${username} already registered.`);
     await fetchRooms();
 });
@@ -218,6 +221,7 @@ function joinRoom() {
 }
 
 async function createRoom() {
+    displayMain();
     var user = usernameInput.value;
     var roomName = roomNameInput.value;
 
@@ -238,6 +242,7 @@ async function createRoom() {
 }
 
 async function createTemporaryRoom() {
+    displayMain();
     var user = usernameInput.value;
     var timer = Number(roomDurationInput.value);
     var roomName = roomNameInput.value;
@@ -277,6 +282,7 @@ function joinRoomInternal(user, roomName) {
 
 
 function deleteRoom() {
+    displayMain();
     var user = usernameInput.value;
     var roomName = roomNameInput.value;
 
@@ -314,6 +320,7 @@ async function removeMember() {
 }
 
 async function switchRoom(roomName) {
+    displayMain();
     currentRoom = roomName;
     currentRoomName.textContent = roomName;
     await displayMessages(roomName);
@@ -344,10 +351,12 @@ function displayMessages(roomName) {
             var sender = messageParts[0].trim();
             var messageContent = messageParts.slice(1).join(': ').trim();
 
-            if (sender === roomOwners[roomName]) {
-                li.innerHTML = `<span style="color: red;">${sender}</span>: ${messageContent}`;
+            li.textContent = `${sender}: ${messageContent}`;
+            
+            if (sender === usernameInput.value) {
+                li.classList.add('user-message');
             } else {
-                li.innerHTML = `<span style="color: blue;">${sender}</span>: ${messageContent}`;
+                li.classList.add('other-message');
             }
         } else {
             li.textContent = message;
@@ -376,6 +385,7 @@ function addRoomToList(roomName) {
 
 
 async function switchRoomUI(roomName) {
+    displayMain();
     currentRoom = roomName;
     currentRoomName.textContent = roomName;
     await clearMessages();
@@ -439,6 +449,7 @@ function updateMemberList(roomName) {
 
 
 function updateUIOnRoomSelection(user, roomName) {
+    displayMain();
     var roomMembers = members[roomName] || [];
 
     var isMember = roomMembers.includes(user);
@@ -465,6 +476,26 @@ async function scheduledRoomRemoval(user, roomName, durationInMinutes) {
         console.error("Error scheduling room deletion: ", error);
     }
 }
+
+function displayMain(){
+    messageContainer.style.display = 'block';
+    
+    roomContainer.style.display = 'none';
+    temporaryRoomContainer.style.display = 'none';
+    roomContainer.style.margin = 'auto';
+    temporaryRoomContainer.style.margin = 'auto';
+}
+
+function displayRoomContainer(){
+    messageContainer.style.display = 'none';
+    
+    roomContainer.style.display = 'block';
+    temporaryRoomContainer.style.display = 'block';
+    roomContainer.style.margin = 'auto';
+    temporaryRoomContainer.style.margin = 'auto';
+}
+
+
 
 messageInput.addEventListener("keyup", function (event) {
     if (event.key === "Enter") {
