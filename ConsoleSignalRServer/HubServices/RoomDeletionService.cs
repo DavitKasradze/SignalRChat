@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -17,25 +18,20 @@ public class RoomDeletionService
     public Task ScheduledRoomRemoval(string user, string roomName, int durationInMinutes)
     {
         var timer = new Timer(TimeSpan.FromMinutes(durationInMinutes).TotalMilliseconds);
-        timer.Elapsed += async (_, _) => await OnTimedEvent(user, roomName, timer);
+        timer.Elapsed += async (_, _) => await OnTimedEvent(roomName);
         timer.AutoReset = false;
         timer.Start();
 
         return Task.CompletedTask;
     }
 
-    private async Task OnTimedEvent(string user, string roomName, Timer timer)
+    private async Task OnTimedEvent(string roomName)
     {
-        if (!await MessageHub.RoomExists(roomName))
+        if (!MessageHub.RoomExists(roomName))
         {
-            timer.Stop();
             return;
         }
         
-        await _hubContext.Clients.All.SendAsync("ReceiveMessage", $"{user} triggered room deletion for {roomName}");
-        
         await _hubContext.Clients.All.SendAsync("RoomDeleted", roomName);
-
-        timer.Stop();
     }
 }

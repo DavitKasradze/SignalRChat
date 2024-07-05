@@ -92,13 +92,11 @@ namespace ConsoleSignalRServer
             if (RoomMembers.TryGetValue(roomName, out var members) && !members.Contains(user))
             {
                 members.Add(user);
+                var systemMessage = $"{user} has joined the room.";
+                RoomMessages[roomName].Add(systemMessage);
+                await Clients.Group(roomName).SendAsync("ReceiveMessage", new { RoomName = roomName, Content = systemMessage });
             }
-
-            var systemMessage = $"{user} has joined the room.";
-            RoomMessages[roomName].Add(systemMessage);
-            await Clients.Group(roomName)
-                .SendAsync("ReceiveMessage", new { RoomName = roomName, Content = systemMessage });
-
+            
             await Groups.AddToGroupAsync(connectionId, roomName);
             await Clients.Group(roomName).SendAsync("ReceiveRoomMember", roomName, members);
             await Clients.Caller.SendAsync("ReceiveExistingMessages", roomName, RoomMessages[roomName]);
@@ -137,19 +135,7 @@ namespace ConsoleSignalRServer
         {
             if (RoomOwners.TryGetValue(roomName, out var owner) && owner == user)
             {
-                Rooms.Remove(roomName);
-                RoomOwners.TryRemove(roomName, out _);
-                RoomMessages.TryRemove(roomName, out _);
-                RoomMembers.TryRemove(roomName, out _);
-
-                foreach (var connectionId in RoomMembers.Keys.ToList())
-                {
-                    if (RoomMembers.TryGetValue(roomName, out var members) && members.Contains(user))
-                    {
-                        members.Remove(user);
-                        await Groups.RemoveFromGroupAsync(connectionId, roomName);
-                    }
-                }
+                await RemoveRoomData(user, roomName);
 
                 await Clients.All.SendAsync("RoomDeleted", roomName);
             }
@@ -161,16 +147,47 @@ namespace ConsoleSignalRServer
 
         public async Task ScheduledRoomRemoval(string user, string roomName, int durationInMinutes)
         {
-            await _roomDeletionService.ScheduledRoomRemoval(user, roomName, durationInMinutes);
+            if (RoomOwners.TryGetValue(roomName, out var owner) && owner == user)
+            {
+                await _roomDeletionService.ScheduledRoomRemoval(user, roomName, durationInMinutes);
+                
+                var timer = new Timer(TimeSpan.FromMinutes(durationInMinutes).TotalMilliseconds);
+                timer.Elapsed += async (_, _) => await RemoveRoomData(user, roomName);
+                timer.AutoReset = false;
+                timer.Start();
+            }
         }
         
-        public static Task<bool> RoomExists(string roomName)
+        private async Task RemoveRoomData(string user, string roomName)
         {
-            return Task.FromResult(Rooms.Contains(roomName));
+            Rooms.Remove(roomName);
+            RoomOwners.TryRemove(roomName, out _);
+            RoomMessages.TryRemove(roomName, out _);
+            RoomMembers.TryRemove(roomName, out _);
+
+            foreach (var connectionId in RoomMembers.Keys.ToList())
+            {
+                if (RoomMembers.TryGetValue(roomName, out var members) && members.Contains(user))
+                {
+                    members.Remove(user);
+                    await Groups.RemoveFromGroupAsync(connectionId, roomName);
+                }
+            }
+        }
+        
+        public static bool RoomExists(string roomName)
+        {
+            return Rooms.Contains(roomName);
         }
         
         public async Task RemoveMember(string owner, string roomName, string memberToRemove)
         {
+            if (memberToRemove == owner)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", "You cannot remove yourself as a member.");
+                return;
+            }
+            
             if (RoomOwners.TryGetValue(roomName, out var roomOwner) && roomOwner == owner)
             {
                 if (RoomMembers.TryGetValue(roomName, out var members) && members.Contains(memberToRemove))
