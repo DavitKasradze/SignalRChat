@@ -15,16 +15,6 @@
             margin: 0;
             background-color: #003859;
         }
-        #welcomeMessage {
-            position: fixed;
-            top: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: baseline;
-            padding: 20px;
-            margin-bottom: 20px;
-            flex-direction: column;
-        }
         #roomListContainer, #messageContainer, #registerRoomForm, #roomContainer, #temporaryRoomContainer {
             background-color: #fff;
             border-radius: 8px;
@@ -33,16 +23,23 @@
             margin-bottom: 20px;
         }
         #temporaryRoomContainer {
+            position: fixed;
             background-color: #0a2231;
             color: white;
+            right: 15%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         #registerRoomForm {
             background-color: #0a2231;
             color: white;
         }
         #roomContainer {
+            position: fixed;
             background-color: #0a2231;
             color: white;
+            left: 30%;
         }
         #roomListContainer {
             position: fixed;
@@ -68,23 +65,16 @@
         #roomList li {
             padding: 10px;
             margin-bottom: 10px;
-            background-color: #f9f9f9;
             border-radius: 4px;
-            white-space: nowrap; /* Prevent wrapping of text */
-            overflow: hidden; /* Hide overflow text */
-            text-overflow: ellipsis; /* Show ellipsis for overflow text */
-            cursor: pointer; /* Add cursor pointer for interactive feel */
+            white-space: nowrap;
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            cursor: pointer; 
             background-color: #003859;
-        }
-        #roomList li.owner {
-            color: red;
-        }
-        #roomList li.member {
-            color: blue;
         }
         #messageContainer {
             position: fixed;
-            left: 15%; /* Align to the right of roomListContainer */
+            left: 15%;
             top: 0;
             right: 0;
             bottom: 0;
@@ -92,18 +82,16 @@
             flex-direction: column;
             background-color: #1a1d21;
             color: white;
-            overflow-y: hidden; /* Adjust overflow behavior as needed */
+            overflow-y: hidden;
             margin-bottom: 0;
         }
         #messageList {
-            flex: 1; /* Take remaining space */
-            max-height: calc(100% - 100px); /* Adjusted max height for scrolling */
+            flex: 1;
+            max-height: calc(100% - 100px);
             overflow-y: auto;
             margin-top: 10px;
             padding: 0;
             list-style-type: none;
-            padding: 0;
-            margin: 0;
         }
         #messageList li {
             max-width: 80%;
@@ -111,18 +99,18 @@
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.1); /* Adjusted background color for messages */
+            background-color: rgba(255, 255, 255, 0.1);
         }
         #messageList li.user-message {
             align-self: flex-end;
-            background-color: #003859; /* Adjusted background color for user messages */
+            background-color: #003859; 
         }
         #messageList li.other-message {
             align-self: flex-start;
-            background-color: rgba(255, 255, 255, 0.3); /* Adjusted background color for other messages */
+            background-color: rgba(255, 255, 255, 0.3); 
         }
         #memberList {
-            max-height: 100px; /* Adjusted height for member list */
+            max-height: 100px; 
             overflow-y: auto;
             padding: 10px;
             list-style-type: none;

@@ -26,17 +26,14 @@ public class RoomDeletionService
 
     private async Task OnTimedEvent(string user, string roomName, Timer timer)
     {
-        // Example logic: Check if the room still exists before proceeding
         if (!await MessageHub.RoomExists(roomName))
         {
             timer.Stop();
             return;
         }
-
-        // Example logic: Use _hubContext to interact with MessageHub correctly
+        
         await _hubContext.Clients.All.SendAsync("ReceiveMessage", $"{user} triggered room deletion for {roomName}");
-
-        // Example logic: Call DeleteRoom on MessageHub instance to perform deletion
+        
         await _hubContext.Clients.All.SendAsync("RoomDeleted", roomName);
 
         timer.Stop();
