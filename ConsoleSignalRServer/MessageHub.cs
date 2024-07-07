@@ -187,12 +187,13 @@ namespace ConsoleSignalRServer
                 await Clients.Caller.SendAsync("ErrorMessage", "You cannot remove yourself as a member.");
                 return;
             }
-            
+
             if (RoomOwners.TryGetValue(roomName, out var roomOwner) && roomOwner == owner)
             {
                 if (RoomMembers.TryGetValue(roomName, out var members) && members.Contains(memberToRemove))
                 {
                     members.Remove(memberToRemove);
+                    await Clients.Group(roomName).SendAsync("ReceiveRoomMember", roomName, members);
 
                     if (RoomMessages.TryGetValue(roomName, out var messages))
                     {
@@ -213,8 +214,7 @@ namespace ConsoleSignalRServer
                         await Clients.Caller.SendAsync("ErrorMessage",
                             $"{memberToRemove} is not connected to the server.");
                     }
-
-                    await Clients.Group(roomName).SendAsync("ReceiveRoomMember", roomName, members);
+                    
                 }
                 else
                 {
@@ -227,18 +227,34 @@ namespace ConsoleSignalRServer
             }
         }
 
-        public async Task RegisterUser(string user)
+        public List<string> GetRoomMembers(string roomName)
         {
+            if (RoomMembers.TryGetValue(roomName, out var members))
+            {
+                return members;
+            }
+            return new List<string>();
+        }
+        
+        public async Task<bool> RegisterUser(string user)
+        {
+            if (string.IsNullOrEmpty(user))
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", "Username cannot be empty.");
+                return false;
+            }
+
             if (Users.ContainsKey(user))
             {
                 await Clients.Caller.SendAsync("UserAlreadyRegistered", user);
+                return false;
             }
-            else
-            {
-                Users.TryAdd(user, Context.ConnectionId);
-                await Clients.Caller.SendAsync("UserRegistered", user);
-            }
+
+            Users.TryAdd(user, Context.ConnectionId);
+            await Clients.Caller.SendAsync("UserRegistered", user);
+            return true;
         }
+
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {

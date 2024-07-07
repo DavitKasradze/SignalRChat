@@ -5,6 +5,11 @@ var connection = new signalR.HubConnectionBuilder()
     .build();
 
 var messageList = document.getElementById("messageList");
+var registerRoomForm = document.getElementById("registerRoomForm");
+var roomMembersList = document.getElementById("roomMembersList");
+var messageContainer = document.getElementById("messageContainer");
+var roomListContainer = document.getElementById("roomListContainer");
+var manageMemberButton = document.getElementById("manageMemberButton");
 var sendButton = document.getElementById("sendButton");
 var messageInput = document.getElementById("messageInput");
 var usernameInput = document.getElementById("username");
@@ -15,16 +20,15 @@ var memberList = document.getElementById("memberList");
 var createRoomButton = document.getElementById("createRoomButton");
 var deleteRoomButton = document.getElementById("deleteRoomButton");
 var registerButton = document.getElementById("registerButton");
-var joinRoomButton = document.getElementById("joinRoomButton");
 var removeMemberButton = document.getElementById("removeMemberButton");
 var removeMemberInput = document.getElementById("removeMemberInput");
 var createTemporaryRoomButton = document.getElementById("createTemporaryRoomButton");
-var roomDurationInput = document.getElementById("roomDuration");
-var joinRoomButtonContainer = document.getElementById("joinRoomButtonContainer")
-const openRoomContainerButton = document.getElementById('openRoomContainerButton');
-const roomContainer = document.getElementById('roomContainer');
-const temporaryRoomContainer = document.getElementById('temporaryRoomContainer');
-var memberActions = document.querySelector('.member-actions');
+var temporaryRoomName = document.getElementById("temporaryRoomName");
+var roomDuration = document.getElementById("roomDuration");
+var joinRoomButton = document.getElementById("joinRoomButton")
+var manageRoomButton = document.getElementById('manageRoomButton');
+var roomContainer = document.getElementById('roomContainer');
+var temporaryRoomContainer = document.getElementById('temporaryRoomContainer');
 
 var currentRoom = null;
 var messages = {};
@@ -63,8 +67,12 @@ createTemporaryRoomButton.addEventListener("click", async function () {
     await createTemporaryRoom();
 });
 
-openRoomContainerButton.addEventListener('click', function() {
-    displayRoomContainer();
+manageRoomButton.addEventListener('click', async function () {
+    await displayRoomContainer();
+});
+
+manageMemberButton.addEventListener('click', async function () {
+    await displayMembers();
 });
 
 
@@ -93,10 +101,12 @@ connection.on("RoomCreated", async function (roomName, owner) {
 
 
 connection.on("ReceiveRoomMember", async function (roomName, roomMembers) {
-    members[roomName] = roomMembers;
-    await updateMemberList(roomName);
-    if (!roomOwners[roomName] && roomMembers.length > 0) {
-        roomOwners[roomName] = roomMembers[0];
+    members[roomName] = await connection.invoke("GetRoomMembers", roomName);
+    if (!members[roomName].includes(usernameInput.value)){
+        cleanMessageContainer();
+    }
+    if (roomName === currentRoom) {
+        await updateMemberList(roomName);
     }
 });
 
@@ -127,25 +137,18 @@ connection.on("ReceiveExistingMessages", async function (roomName, existingMessa
 });
 
 connection.on("UserRegistered", async (username) => {
-    document.getElementById("registerRoomForm").style.display = "none";
-    document.getElementById("roomListContainer").style.display = "flex";
-    document.getElementById("messageContainer").style.display = "flex";
-
-    // document.getElementById("displayUsername").textContent = username.toUpperCase();
-    // document.getElementById("welcomeMessage").style.display = "flex";
+    registerRoomForm.style.display = "none";
+    roomListContainer.style.display = "block";
+    messageContainer.style.display = "block";
+    
+    sendButton.style.display = "none";
+    messageInput.style.display = "none";
     console.log(`${username} registered successfully.`);
     await fetchRooms();
 });
 
 connection.on("UserAlreadyRegistered", async (username) => {
-    document.getElementById("registerRoomForm").style.display = "none";
-    document.getElementById("roomListContainer").style.display = "flex";
-    document.getElementById("messageContainer").style.display = "flex";
-
-    // document.getElementById("displayUsername").textContent = username.toUpperCase();
-    // document.getElementById("welcomeMessage").style.display = "flex";
-    console.log(`${username} already registered.`);
-    await fetchRooms();
+    alert(`${username} already exists!`)
 });
 
 connection.on("ErrorMessage", function (errorMessage) {
@@ -206,11 +209,16 @@ function joinRoom() {
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("JoinRoom", user, roomName)
             .then(async function () {
-                messageInput.disabled = false;
-                sendButton.disabled = false;
+                messageContainer.style.display = 'block';
+                messageInput.style.display = 'block';
+                sendButton.style.display = 'block';
                 await addRoomToList(roomName);
                 await switchRoom(roomName);
                 await updateUIOnRoomSelection(user, roomName);
+                manageMemberButton.style.display = "block";
+                joinRoomButton.style.display = 'none';
+                messageInput.disabled = false;
+                sendButton.disabled = false;
             })
             .catch(function (err) {
                 console.error(err.toString());
@@ -232,6 +240,7 @@ async function createRoom() {
                 await updateMemberList(roomName);
                 await displayMessages(roomName);
                 roomNameInput.value = '';
+                currentRoom = roomName;
             })
             .catch(function (err) {
                 console.error(err.toString());
@@ -244,8 +253,8 @@ async function createRoom() {
 async function createTemporaryRoom() {
     displayMain();
     var user = usernameInput.value;
-    var timer = Number(roomDurationInput.value);
-    var roomName = roomNameInput.value;
+    var timer = Number(roomDuration.value);
+    var roomName = temporaryRoomName.value;
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName && timer) {
         connection.invoke("CreateRoom", user, roomName).then(async function () {
@@ -253,8 +262,9 @@ async function createTemporaryRoom() {
             await updateMemberList(roomName);
             await displayMessages(roomName);
             await scheduledRoomRemoval(user, roomName, timer);
-            roomDurationInput.value = '';
+            roomDuration.value = '';
             roomNameInput.value = '';
+            currentRoom = roomName;
         })
             .catch(function (err) {
                 console.error(err.toString());
@@ -269,16 +279,23 @@ function joinRoomInternal(user, roomName) {
         .then(async function () {
             currentRoom = roomName;
             currentRoomName.textContent = roomName;
+            messageContainer.style.display = 'block';
+            await displayMessages(roomName);
+            await updateMemberList(roomName);
+            await updateUIOnRoomSelection(user, roomName);
+            manageMemberButton.style.display = "block";
+            
+            sendButton.style.display = 'block';
+            messageInput.style.display = 'block';
+            joinRoomButton.style.display = 'none';
             messageInput.disabled = false;
             sendButton.disabled = false;
-            await addRoomToList(roomName);
-            await switchRoom(roomName);
-            await updateUIOnRoomSelection(user, roomName);
         })
         .catch(function (err) {
             console.error(err.toString());
         });
 }
+
 
 
 function deleteRoom() {
@@ -289,7 +306,7 @@ function deleteRoom() {
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("DeleteRoom", user, roomName)
             .then(async function () {
-                joinRoomButtonContainer.style.display = "none";
+                joinRoomButton.style.display = "none";
                 messageInput.disabled = true;
                 sendButton.disabled = true;
             })
@@ -305,18 +322,18 @@ async function removeMember() {
     var user = usernameInput.value;
     var roomName = currentRoom;
     var memberToRemove = removeMemberInput.value;
-
+    
     if (connection.state === signalR.HubConnectionState.Connected && roomName && user && memberToRemove) {
-        await connection.invoke("RemoveMember", user, roomName, memberToRemove).then(async function () {
-            await updateMemberList(roomName);
-            removeMemberInput.value = '';
-        })
-            .catch(function (err) {
-                console.error(err.toString());
-            });
+        try {
+            await connection.invoke("RemoveMember", user, roomName, memberToRemove);
+        } catch (err) {
+            console.error(err.toString());
+        }
     } else {
         console.error("Connection is not in 'Connected' state, or no room selected, or username/member to remove is empty.");
     }
+
+    removeMemberInput.value = '';
 }
 
 async function switchRoom(roomName) {
@@ -328,7 +345,7 @@ async function switchRoom(roomName) {
     await updateUIOnRoomSelection(usernameInput.value, roomName);
 
     var isJoined = members[currentRoom] && members[currentRoom].includes(usernameInput.value);
-    joinRoomButtonContainer.style.display = isJoined ? "none" : "block";
+    joinRoomButton.style.display = isJoined ? "none" : "block";
 }
 
 
@@ -389,19 +406,26 @@ async function switchRoomUI(roomName) {
     currentRoom = roomName;
     currentRoomName.textContent = roomName;
     await clearMessages();
-    joinRoomButtonContainer.style.display = "block";
-    
+    roomMembersList.style.display = "none";
+
     var user = usernameInput.value;
+    
+    var isJoined = members[currentRoom] && members[currentRoom].includes(user);
 
-
-    if (roomOwners[roomName] === user) {
-        joinRoomInternal(user, roomName);
+    if (isJoined) {
+        joinRoomButton.style.display = "none";
+        messageInput.style.display = "block";
+        sendButton.style.display = "block";
+        await displayMessages(roomName);
     } else {
-        var isJoined = members[currentRoom] && members[currentRoom].includes(usernameInput.value);
-        joinRoomButtonContainer.style.display = isJoined ? "none" : "block";
+        messageInput.style.display = "none";
+        sendButton.style.display = "none";
+        joinRoomButton.style.display = "block";
     }
+    
+    await updateMemberList(roomName);
+    await updateUIOnRoomSelection(user, roomName);
 }
-
 
 function clearMessages() {
     messageList.innerHTML = '';
@@ -418,7 +442,7 @@ async function removeRoomFromList(roomName) {
         currentRoomName.textContent = "";
         messageList.innerHTML = "";
         memberList.innerHTML = "";
-        memberActions.style.display = 'none';
+        manageMemberButton.style.display = "none";
     }
 }
 
@@ -427,7 +451,6 @@ function updateMemberList(roomName) {
     memberList.innerHTML = '';
 
     var maxMembersToShow = 20;
-
     var startIndex = Math.max(roomMembers.length - maxMembersToShow, 0);
     var displayedMembers = roomMembers.slice(startIndex);
 
@@ -435,7 +458,7 @@ function updateMemberList(roomName) {
         var li = document.createElement("li");
         li.textContent = member;
 
-        if (member === roomOwners[roomName]) {
+        if (roomOwners[roomName] && member === roomOwners[roomName]) {
             li.classList.add("owner");
         } else {
             li.classList.add("member");
@@ -457,15 +480,14 @@ function updateUIOnRoomSelection(user, roomName) {
     if (isMember) {
         messageInput.disabled = false;
         sendButton.disabled = false;
+        
     } else {
         messageInput.disabled = true;
         sendButton.disabled = true;
     }
 
     if (roomOwners[roomName] === user) {
-        memberActions.style.display = 'block';
-    } else {
-        memberActions.style.display = 'none';
+        manageMemberButton.style.display = "block";
     }
 }
 
@@ -482,12 +504,28 @@ function displayMain(){
     
     roomContainer.style.display = 'none';
     temporaryRoomContainer.style.display = 'none';
-    roomContainer.style.margin = 'auto';
-    temporaryRoomContainer.style.margin = 'auto';
+}
+
+function displayMembers(){
+    var user = usernameInput.value;
+    var roomName = currentRoomName.textContent;
+    
+    roomMembersList.style.display = 'block';
+    messageContainer.style.display = 'none';
+
+    if (roomOwners[roomName] !== user){
+        removeMemberButton.style.display = 'none';
+        removeMemberInput.style.display = 'none';
+    }
+    else{
+        removeMemberButton.style.display = 'block';
+        removeMemberInput.style.display = 'block';
+    }
 }
 
 function displayRoomContainer(){
     messageContainer.style.display = 'none';
+    roomMembersList.style.display = 'none';
     
     roomContainer.style.display = 'block';
     temporaryRoomContainer.style.display = 'block';
@@ -495,7 +533,13 @@ function displayRoomContainer(){
     temporaryRoomContainer.style.margin = 'auto';
 }
 
-
+function cleanMessageContainer(){
+    messageInput.style.display = 'none';
+    sendButton.style.display = 'none';
+    manageMemberButton.style.display = 'none';
+    clearMessages();
+    currentRoomName.textContent = "No Room Selected";
+}
 
 messageInput.addEventListener("keyup", function (event) {
     if (event.key === "Enter") {

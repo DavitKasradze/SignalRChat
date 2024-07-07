@@ -4,230 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SignalR Chat</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #003859;
-        }
-        #roomListContainer, #messageContainer, #registerRoomForm, #roomContainer, #temporaryRoomContainer {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        #temporaryRoomContainer {
-            position: fixed;
-            background-color: #0a2231;
-            color: white;
-            right: 15%;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        #registerRoomForm {
-            background-color: #0a2231;
-            color: white;
-        }
-        #roomContainer {
-            position: fixed;
-            background-color: #0a2231;
-            color: white;
-            left: 30%;
-        }
-        #roomListContainer {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 14%;
-            max-width: 100%;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            background-color: #0a2231;
-            color: white;
-            margin-bottom: 0;
-        }
-        #roomList {
-            padding: 0;
-            list-style-type: none;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        #roomList li {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            white-space: nowrap;
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            cursor: pointer; 
-            background-color: #003859;
-        }
-        #messageContainer {
-            position: fixed;
-            left: 15%;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            background-color: #1a1d21;
-            color: white;
-            overflow-y: hidden;
-            margin-bottom: 0;
-        }
-        #messageList {
-            flex: 1;
-            max-height: calc(100% - 100px);
-            overflow-y: auto;
-            margin-top: 10px;
-            padding: 0;
-            list-style-type: none;
-        }
-        #messageList li {
-            max-width: 80%;
-            word-wrap: break-word;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        #messageList li.user-message {
-            align-self: flex-end;
-            background-color: #2d8bb2; 
-        }
-        #messageList li.other-message {
-            align-self: flex-start;
-            background-color: rgba(255, 255, 255, 0.3); 
-        }
-        #memberList {
-            max-height: 100px; 
-            overflow-y: auto;
-            padding: 10px;
-            list-style-type: none;
-            margin: 10px 0;
-        }
-        h2 {
-            margin-top: 0;
-            font-size: 1.2rem;
-        }
-        .input-group {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        .input-group label {
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        input[type="text"], input[type="number"] {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 200px;
-            margin-left: 0;
-            background-color: #222529;
-            color: white;
-        }
-        button {
-            padding: 8px 16px;
-            margin: 5px;
-            border: none;
-            background-color: #003859;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #36637d;
-        }
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-        li {
-            margin-bottom: 8px;
-            padding: 8px;
-            color: white;
-            border-radius: 4px;
-        }
-        li.owner {
-            color: #6fcbff;
-        }
-        li.member {
-            color: #c0c0c0;
-        }
-        .member-actions {
-            margin-top: 10px;
-        }
-    </style>
 </head>
 <body>
-<!--<div id="welcomeMessage" style="display: none;">-->
-<!--    <h1>Welcome, <span id="displayUsername"></span>!</h1>-->
-<!--</div>-->
-<div id="roomListContainer" style="display: none;">
+<div id="registerRoomForm">
+    <div class="input-group">
+        <input type="text" id="username" placeholder="Enter your username...">
+        <button id="registerButton">Enter</button>
+    </div>
+</div>
+<div id="roomListContainer">
     <h2>Rooms</h2>
     <div id="roomList"></div>
-    <button id="openRoomContainerButton">Manage Rooms</button>
+    <button id="manageRoomButton">Manage Rooms</button>
 </div>
 
-<div id="roomContainer" style="display: none;">
+<div id="roomContainer">
     <div class="input-group">
-        <label for="roomName"></label>
         <input type="text" id="roomName" placeholder="Enter room name...">
         <button id="createRoomButton">Create</button>
         <button id="deleteRoomButton">Delete</button>
     </div>
 </div>
 
-<div id="temporaryRoomContainer" style="display: none;">
+<div id="temporaryRoomContainer">
     <div class="input-group">
-        <h2>Temporary Room</h2>
+        <input type="text" id="temporaryRoomName" placeholder="Enter temporary room name...">
         <input type="number" id="roomDuration" placeholder="Duration (minutes)">
-        <button id="createTemporaryRoomButton">Enter</button>
+        <button id="createTemporaryRoomButton">Create</button>
     </div>
 </div>
 
-<div id="messageContainer" style="display: none;">
+<div id="messageContainer">
     <h2 id="currentRoomName">No Room Selected</h2>
     <ul id="messageList"></ul>
     <div class="input-group">
-        <input type="text" id="messageInput" placeholder="Type your message..." disabled>
-        <button id="sendButton" disabled>Send</button>
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button id="sendButton">Send</button>
     </div>
-    <h2>Members</h2>
-    <ul id="memberList"></ul>
-    <div class="member-actions" style="display: none;">
-        <label for="removeMemberInput">Remove Member:</label>
-        <input type="text" id="removeMemberInput" placeholder="Enter member's username...">
-        <button id="removeMemberButton">Remove</button>
+    <div class="member-actions">
+        <button id="manageMemberButton">Members</button>
     </div>
-    <div id="joinRoomButtonContainer" style="display: none;">
+    <div id="joinRoomButtonContainer">
         <button id="joinRoomButton">Join Room</button>
     </div>
 </div>
-<div id="registerRoomForm">
-    <div class="input-group">
-        <label for="username"></label>
-        <input type="text" id="username" placeholder="Enter your username...">
-        <button id="registerButton">Enter</button>
-    </div>
+<div id="roomMembersList">
+    <h2>Members</h2>
+    <ul id="memberList"></ul>
+    <input type="text" id="removeMemberInput" placeholder="Type member name...">
+    <button id="removeMemberButton">Remove</button>
 </div>
+
 <script src="script.js"></script>
 </body>
 </html>
