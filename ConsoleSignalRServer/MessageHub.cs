@@ -13,16 +13,13 @@ namespace ConsoleSignalRServer
     public class MessageHub : Hub
     {
         private readonly RoomDeletionService _roomDeletionService;
-        private static readonly ConcurrentDictionary<string, RoomData> RoomData = new();
         
-        // List to store all active rooms
         private static readonly List<string> Rooms = new();
+        //(roomName-RoomData)
+        private static readonly ConcurrentDictionary<string, RoomData> RoomData = new();
+        //(userName-UserData)
+        private static readonly ConcurrentDictionary<string, UserData> UserData = new();
 
-        //(user -> List<MutedMembers>)
-        private static readonly ConcurrentDictionary<string, List<string>> UserMutedMembers = new();
-
-        //(user -> connectionId)
-        private static readonly ConcurrentDictionary<string, string> Users = new();
         
         public MessageHub(RoomDeletionService roomDeletionService)
         {
@@ -32,7 +29,7 @@ namespace ConsoleSignalRServer
         public override async Task OnConnectedAsync()
         {
             var connectionId = Context.ConnectionId;
-            var user = Users.FirstOrDefault(u => u.Value == connectionId).Key;
+            var user = UserData.FirstOrDefault(u => u.Value.ConnectionId == connectionId).Key;
 
             if (!string.IsNullOrEmpty(user))
             {
@@ -180,9 +177,9 @@ namespace ConsoleSignalRServer
                 
                 foreach (var member in roomData.Members)
                 {
-                    if (Users.TryGetValue(member, out var connectionId))
+                    if (UserData.TryGetValue(member, out var userData))
                     {
-                        await _roomDeletionService.RemoveGroupData(connectionId, roomName);
+                        await _roomDeletionService.RemoveGroupData(userData.ConnectionId, roomName);
                     }
                 }
             }
@@ -210,16 +207,15 @@ namespace ConsoleSignalRServer
                     await Clients.Group(roomName).SendAsync("ReceiveMessage",
                         new { RoomName = roomName, Content = systemMessage });
 
-                    if (Users.TryGetValue(memberToRemove, out var memberConnectionId))
+                    if (UserData.TryGetValue(memberToRemove, out var userData))
                     {
-                        await Groups.RemoveFromGroupAsync(memberConnectionId, roomName);
+                        await Groups.RemoveFromGroupAsync(userData.ConnectionId, roomName);
                     }
                     else
                     {
                         await Clients.Caller.SendAsync("ErrorMessage",
-                            $"{memberToRemove} is not connected to the server.");
+                            $"{memberToRemove} is not registered in the room.");
                     }
-                    
                 }
                 else
                 {
@@ -264,15 +260,16 @@ namespace ConsoleSignalRServer
                 }
                 else
                 {
-                    if (!UserMutedMembers.ContainsKey(user))
+                    UserData.TryGetValue(user, out var userData);
+                    var userMutedMembers = userData?.MutedMembers ?? new List<string>();
+
+                    if (!userMutedMembers.Contains(memberToMute))
                     {
-                        UserMutedMembers[user] = new List<string>();
+                        userMutedMembers.Add(memberToMute);
+                        UserData[user].MutedMembers = userMutedMembers;
+
+                        await Clients.Caller.SendAsync("MemberMutedByUser", userMutedMembers);
                     }
-
-                    UserMutedMembers[user].Add(memberToMute);
-
-                    var mutedMembers = UserMutedMembers[user];
-                    await Clients.Caller.SendAsync("MemberMutedByUser", mutedMembers);
                 }
             }
         }
@@ -285,35 +282,45 @@ namespace ConsoleSignalRServer
                 return false;
             }
 
-            if (Users.ContainsKey(user))
+            if (UserData.ContainsKey(user))
             {
                 await Clients.Caller.SendAsync("UserAlreadyRegistered", user);
                 return false;
             }
 
-            Users.TryAdd(user, Context.ConnectionId);
+            UserData.TryAdd(user, new UserData { MutedMembers = new List<string>(), ConnectionId = Context.ConnectionId });
+    
             await Clients.Caller.SendAsync("UserRegistered", user);
             return true;
         }
 
 
+
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var connectionId = Context.ConnectionId;
-            var user = Users.FirstOrDefault(u => u.Value == connectionId).Key;
+            var disconnectedUser = string.Empty;
+    
+            foreach (var userDataEntry in UserData)
+            {
+                if (userDataEntry.Value.ConnectionId == connectionId)
+                {
+                    disconnectedUser = userDataEntry.Key;
+                }
+            }
 
-            if (!string.IsNullOrEmpty(user))
+            if (!string.IsNullOrEmpty(disconnectedUser))
             {
                 foreach (var roomDataEntry in RoomData)
                 {
                     var roomName = roomDataEntry.Key;
                     var roomData = roomDataEntry.Value;
-                    
-                    if (roomData.Members.Contains(user))
+
+                    if (roomData.Members.Contains(disconnectedUser))
                     {
-                        roomData.Members.Remove(user);
-                        
-                        var systemMessage = $"{user} has left the room.";
+                        roomData.Members.Remove(disconnectedUser);
+
+                        var systemMessage = $"{disconnectedUser} has left the room.";
                         roomData.Messages.Add(systemMessage);
 
                         await Clients.Group(roomName).SendAsync("ReceiveMessage",
@@ -323,9 +330,9 @@ namespace ConsoleSignalRServer
                     }
                 }
                 
-                Users.TryRemove(user, out _);
+                UserData.TryRemove(disconnectedUser, out _);
                 
-                await Clients.All.SendAsync("UserDisconnected", user);
+                await Clients.All.SendAsync("UserDisconnected", disconnectedUser);
             }
 
             await base.OnDisconnectedAsync(exception);
