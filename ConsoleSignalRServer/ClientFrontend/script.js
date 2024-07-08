@@ -36,6 +36,7 @@ let messages = {};
 let members = {};
 let roomOwners = {};
 let mutedMembers = [];
+let roomsList = [];
 
 messageInput.disabled = true;
 sendButton.disabled = true;
@@ -106,7 +107,9 @@ connection.on("RoomCreated", async function (roomName, owner) {
     members[roomName] = [];
     await updateMemberList(roomName);
     roomOwners[roomName] = owner;
-    await updateUIOnRoomSelection(usernameInput.value, roomName);
+    if (registerRoomForm.style.display === "none"){
+        await updateUIOnRoomSelection(usernameInput.value, roomName);
+    }
 });
 
 
@@ -124,18 +127,21 @@ connection.on("ReceiveRoomMember", async function (roomName, roomMembers) {
 
 connection.on("RoomDeleted", async function (roomName) {
     await removeRoomFromList(roomName);
+    currentRoomName.textContent = "No Room Selected";
+    messageInput.style.display = "none";
+    sendButton.style.display = "none";
 
     if (currentRoom === roomName) {
         currentRoom = null;
         currentRoomName.textContent = "";
         messageList.innerHTML = "";
         memberList.innerHTML = "";
-        memberActions.style.display = 'none';
     }
 });
 
 connection.on("AllRooms", function (rooms) {
     roomList.innerHTML = "";
+    roomsList = rooms;
     rooms.forEach(function (room) {
         addRoomToList(room);
     });
@@ -249,17 +255,26 @@ function joinRoom() {
 }
 
 async function createRoom() {
-    displayMain();
+    await fetchRooms();
     const user = usernameInput.value;
     const roomName = roomNameInput.value;
 
+    if (roomsList.includes(roomName)){
+        alert(`${roomName} already exists`);
+        return;
+    }
+
+    displayMain();
+    
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("CreateRoom", user, roomName)
             .then(async function () {
                 await joinRoomInternal(user, roomName);
                 await updateMemberList(roomName);
                 await displayMessages(roomName);
+                roomDuration.value = '';
                 roomNameInput.value = '';
+                temporaryRoomName.value = '';
                 currentRoom = roomName;
             })
             .catch(function (err) {
@@ -271,11 +286,19 @@ async function createRoom() {
 }
 
 async function createTemporaryRoom() {
-    displayMain();
+    await fetchRooms();
+    
     const user = usernameInput.value;
     const timer = Number(roomDuration.value);
     const roomName = temporaryRoomName.value;
 
+    if (roomsList.includes(roomName)){
+        alert(`${roomName} already exists`);
+        return;
+    }
+
+    displayMain();
+    
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName && timer) {
         connection.invoke("CreateRoom", user, roomName).then(async function () {
             await joinRoomInternal(user, roomName);
@@ -284,6 +307,7 @@ async function createTemporaryRoom() {
             await scheduledRoomRemoval(user, roomName, timer);
             roomDuration.value = '';
             roomNameInput.value = '';
+            temporaryRoomName.value = '';
             currentRoom = roomName;
         })
             .catch(function (err) {
@@ -329,6 +353,13 @@ function deleteRoom() {
                 joinRoomButton.style.display = "none";
                 messageInput.disabled = true;
                 sendButton.disabled = true;
+                roomNameInput.value = '';
+                roomDuration.value = '';
+                roomNameInput.value = '';
+                currentRoomName.textContent = "No Room Selected";
+                messageInput.style.display = "none";
+                sendButton.style.display = "none";
+                manageMemberButton.style.display = "none";
             })
             .catch(function (err) {
                 console.error(err.toString());

@@ -15,23 +15,13 @@ public class RoomDeletionService
         _hubContext = hubContext;
     }
 
-    public Task TimedRoomRemoval(string user, string roomName, int durationInMinutes)
+    public async Task TimedRemoveMessage(string roomName)
     {
-        var timer = new Timer(TimeSpan.FromMinutes(durationInMinutes).TotalMilliseconds);
-        timer.Elapsed += async (_, _) => await OnTimedEvent(roomName);
-        timer.AutoReset = false;
-        timer.Start();
-
-        return Task.CompletedTask;
+        await _hubContext.Clients.All.SendAsync("RoomDeleted", roomName);
     }
 
-    private async Task OnTimedEvent(string roomName)
+    public async Task RemoveGroupData(string connectionId ,string roomName)
     {
-        if (!MessageHub.RoomExists(roomName))
-        {
-            return;
-        }
-        
-        await _hubContext.Clients.All.SendAsync("RoomDeleted", roomName);
+        await _hubContext.Groups.RemoveFromGroupAsync(connectionId, roomName);
     }
 }
