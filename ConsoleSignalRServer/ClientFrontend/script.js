@@ -168,7 +168,7 @@ connection.on("ErrorMessage", function (errorMessage) {
 });
 
 connection.on("MemberMutedByOwner", function (user, roomName, mutedMember) {
-    console.log(`Member '${mutedMember}' muted in room '${roomName}'.`);
+    alert(`user has been muted!`);
 });
 connection.on("MemberMutedByUser", function (updatedMutedMembers) {
     mutedMembers = updatedMutedMembers;
