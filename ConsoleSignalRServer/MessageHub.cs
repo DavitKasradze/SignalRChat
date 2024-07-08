@@ -156,7 +156,7 @@ namespace ConsoleSignalRServer
         {
             if (RoomOwners.TryGetValue(roomName, out var owner) && owner == user)
             {
-                await _roomDeletionService.ScheduledRoomRemoval(user, roomName, durationInMinutes);
+                await _roomDeletionService.TimedRoomRemoval(user, roomName, durationInMinutes);
                 
                 var timer = new Timer(TimeSpan.FromMinutes(durationInMinutes).TotalMilliseconds);
                 timer.Elapsed += async (_, _) => await RemoveRoomData(user, roomName);

@@ -15,7 +15,7 @@ public class RoomDeletionService
         _hubContext = hubContext;
     }
 
-    public Task ScheduledRoomRemoval(string user, string roomName, int durationInMinutes)
+    public Task TimedRoomRemoval(string user, string roomName, int durationInMinutes)
     {
         var timer = new Timer(TimeSpan.FromMinutes(durationInMinutes).TotalMilliseconds);
         timer.Elapsed += async (_, _) => await OnTimedEvent(roomName);
