@@ -297,19 +297,28 @@ namespace ConsoleSignalRServer
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var connectionId = Context.ConnectionId;
+            var user = Users.FirstOrDefault(u => u.Value == connectionId).Key;
 
-            foreach (var roomName in RoomMembers.Keys.ToList())
+            if (!string.IsNullOrEmpty(user))
             {
-                if (RoomMembers.TryGetValue(roomName, out var members) && members.Contains(connectionId))
+                foreach (var roomName in RoomMembers.Keys.ToList())
                 {
-                    members.Remove(connectionId);
-                    await Clients.Group(roomName).SendAsync("ReceiveMessage",
-                        new { RoomName = roomName, Content = $"{connectionId} has left the room." });
-                    await Clients.Group(roomName).SendAsync("ReceiveRoomMember", roomName, members);
+                    if (RoomMembers.TryGetValue(roomName, out var members) && members.Contains(user))
+                    {
+                        members.Remove(user);
+                        await Clients.Group(roomName).SendAsync("ReceiveMessage",
+                            new { RoomName = roomName, Content = $"{user} has left the room." });
+                        await Clients.Group(roomName).SendAsync("ReceiveRoomMember", roomName, members);
+                    }
                 }
+                
+                Users.TryRemove(user, out _);
+                
+                await Clients.All.SendAsync("UserDisconnected", user);
             }
 
             await base.OnDisconnectedAsync(exception);
         }
+
     }
 }
