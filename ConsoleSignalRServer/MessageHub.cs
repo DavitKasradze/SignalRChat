@@ -17,6 +17,8 @@ namespace ConsoleSignalRServer
         private static readonly ConcurrentDictionary<string, List<string>> RoomMembers = new();
         private static readonly List<string> Rooms = new();
         private static readonly ConcurrentDictionary<string, string> Users = new();
+        private static readonly ConcurrentDictionary<string, List<string>> RoomMutedMembers = new();
+        private static readonly ConcurrentDictionary<string, List<string>> UserMutedMembers = new();
         
         public MessageHub(RoomDeletionService roomDeletionService)
         {
@@ -55,7 +57,13 @@ namespace ConsoleSignalRServer
                 await Clients.Caller.SendAsync("ErrorMessage", "You are not a member of this room.");
                 return;
             }
-
+            
+            if (RoomMutedMembers.TryGetValue(roomName, out var roomMutedMembers) && roomMutedMembers.Contains(user))
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", "You are muted in this room and cannot send messages.");
+                return;
+            }
+            
             var fullMessage = $"{user}: {message}";
 
             if (!RoomMessages.TryGetValue(roomName, out var messages))
@@ -65,9 +73,8 @@ namespace ConsoleSignalRServer
             }
 
             messages.Add(fullMessage);
-
-            await Clients.Group(roomName)
-                .SendAsync("ReceiveMessage", new { RoomName = roomName, Content = fullMessage });
+            
+            await Clients.Group(roomName).SendAsync("ReceiveMessage", new { RoomName = roomName, Content = fullMessage });
         }
 
         public async Task JoinRoom(string user, string roomName)
@@ -234,6 +241,37 @@ namespace ConsoleSignalRServer
                 return members;
             }
             return new List<string>();
+        }
+        
+        public async Task MuteMember(string user, string roomName, string memberToMute)
+        {
+            if (user == memberToMute)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", "You cannot mute yourself as a member.");
+                return;
+            }
+
+            if (RoomOwners.TryGetValue(roomName, out var roomOwner) && roomOwner == user)
+            {
+                if (!RoomMutedMembers.ContainsKey(roomName))
+                {
+                    RoomMutedMembers[roomName] = new List<string>();
+                }
+                RoomMutedMembers[roomName].Add(memberToMute);
+
+                await Clients.Group(roomName).SendAsync("MemberMutedByOwner", user, roomName, memberToMute);
+            }
+            else
+            {
+                if (!UserMutedMembers.ContainsKey(user))
+                {
+                    UserMutedMembers[user] = new List<string>();
+                }
+                UserMutedMembers[user].Add(memberToMute);
+                
+                var mutedMembers = UserMutedMembers[user];
+                await Clients.Caller.SendAsync("MemberMutedByUser", mutedMembers);
+            }
         }
         
         public async Task<bool> RegisterUser(string user)

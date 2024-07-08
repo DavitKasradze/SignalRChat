@@ -1,39 +1,41 @@
 "use strict";
 
-var connection = new signalR.HubConnectionBuilder()
+const connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5000/messageHub")
     .build();
 
-var messageList = document.getElementById("messageList");
-var registerRoomForm = document.getElementById("registerRoomForm");
-var roomMembersList = document.getElementById("roomMembersList");
-var messageContainer = document.getElementById("messageContainer");
-var roomListContainer = document.getElementById("roomListContainer");
-var manageMemberButton = document.getElementById("manageMemberButton");
-var sendButton = document.getElementById("sendButton");
-var messageInput = document.getElementById("messageInput");
-var usernameInput = document.getElementById("username");
-var roomNameInput = document.getElementById("roomName");
-var currentRoomName = document.getElementById("currentRoomName");
-var roomList = document.getElementById("roomList");
-var memberList = document.getElementById("memberList");
-var createRoomButton = document.getElementById("createRoomButton");
-var deleteRoomButton = document.getElementById("deleteRoomButton");
-var registerButton = document.getElementById("registerButton");
-var removeMemberButton = document.getElementById("removeMemberButton");
-var removeMemberInput = document.getElementById("removeMemberInput");
-var createTemporaryRoomButton = document.getElementById("createTemporaryRoomButton");
-var temporaryRoomName = document.getElementById("temporaryRoomName");
-var roomDuration = document.getElementById("roomDuration");
-var joinRoomButton = document.getElementById("joinRoomButton")
-var manageRoomButton = document.getElementById('manageRoomButton');
-var roomContainer = document.getElementById('roomContainer');
-var temporaryRoomContainer = document.getElementById('temporaryRoomContainer');
+const messageList = document.getElementById("messageList");
+const registerRoomForm = document.getElementById("registerRoomForm");
+const roomMembersList = document.getElementById("roomMembersList");
+const messageContainer = document.getElementById("messageContainer");
+const roomListContainer = document.getElementById("roomListContainer");
+const manageMemberButton = document.getElementById("manageMemberButton");
+const sendButton = document.getElementById("sendButton");
+const messageInput = document.getElementById("messageInput");
+const usernameInput = document.getElementById("username");
+const roomNameInput = document.getElementById("roomName");
+const currentRoomName = document.getElementById("currentRoomName");
+const roomList = document.getElementById("roomList");
+const memberList = document.getElementById("memberList");
+const createRoomButton = document.getElementById("createRoomButton");
+const deleteRoomButton = document.getElementById("deleteRoomButton");
+const registerButton = document.getElementById("registerButton");
+const removeMemberButton = document.getElementById("removeMemberButton");
+const removeMemberInput = document.getElementById("removeMemberInput");
+const createTemporaryRoomButton = document.getElementById("createTemporaryRoomButton");
+const temporaryRoomName = document.getElementById("temporaryRoomName");
+const roomDuration = document.getElementById("roomDuration");
+const joinRoomButton = document.getElementById("joinRoomButton")
+const manageRoomButton = document.getElementById('manageRoomButton');
+const roomContainer = document.getElementById('roomContainer');
+const temporaryRoomContainer = document.getElementById('temporaryRoomContainer');
+const muteMemberButton = document.getElementById('muteMemberButton');
 
-var currentRoom = null;
-var messages = {};
-var members = {};
-var roomOwners = {};
+let currentRoom = null;
+let messages = {};
+let members = {};
+let roomOwners = {};
+let mutedMembers = [];
 
 messageInput.disabled = true;
 sendButton.disabled = true;
@@ -75,18 +77,26 @@ manageMemberButton.addEventListener('click', async function () {
     await displayMembers();
 });
 
+muteMemberButton.addEventListener('click', async function () {
+    await muteMember();
+});
 
 connection.on("ReceiveMessage", async function (message) {
-    var roomName = message.roomName;
-    var content = message.content;
+    const messageParts = message.content.split(': ');
+    const sender = messageParts[0].trim();
+    
+    if (!mutedMembers.includes(sender)) {
+        const roomName = message.roomName;
+        const content = message.content;
 
-    if (!messages[roomName]) {
-        messages[roomName] = [];
-    }
-    messages[roomName].push(content);
+        if (!messages[roomName]) {
+            messages[roomName] = [];
+        }
+        messages[roomName].push(content);
 
-    if (roomName === currentRoom) {
-        await displayMessages(roomName);
+        if (roomName === currentRoom) {
+            await displayMessages(roomName);
+        }
     }
 });
 
@@ -103,6 +113,8 @@ connection.on("RoomCreated", async function (roomName, owner) {
 connection.on("ReceiveRoomMember", async function (roomName, roomMembers) {
     members[roomName] = await connection.invoke("GetRoomMembers", roomName);
     if (!members[roomName].includes(usernameInput.value)){
+        removeMemberInput.style.display = "none";
+        muteMemberButton.style.display = "none";
         cleanMessageContainer();
     }
     if (roomName === currentRoom) {
@@ -155,6 +167,14 @@ connection.on("ErrorMessage", function (errorMessage) {
     alert(errorMessage);
 });
 
+connection.on("MemberMutedByOwner", function (user, roomName, mutedMember) {
+    console.log(`Member '${mutedMember}' muted in room '${roomName}'.`);
+});
+connection.on("MemberMutedByUser", function (updatedMutedMembers) {
+    mutedMembers = updatedMutedMembers;
+    alert(`user has been muted!`);
+});
+
 connection.start()
     .then(async function () {
         await fetchRooms();
@@ -177,9 +197,9 @@ async function fetchRooms() {
 }
 
 function sendMessage() {
-    var user = usernameInput.value;
-    var message = messageInput.value;
-    var roomName = currentRoom;
+    const user = usernameInput.value;
+    const message = messageInput.value;
+    const roomName = currentRoom;
 
     if (connection.state === signalR.HubConnectionState.Connected && roomName && user && message) {
         connection.invoke("SendMessageToRoom", roomName, user, message)
@@ -195,7 +215,7 @@ function sendMessage() {
 }
 
 async function registerUser() {
-    var username = usernameInput.value;
+    const username = usernameInput.value;
     await connection.invoke("RegisterUser", username)
         .catch(err => {
             console.error(err.toString());
@@ -203,8 +223,8 @@ async function registerUser() {
 }
 
 function joinRoom() {
-    var user = usernameInput.value;
-    var roomName = currentRoomName.textContent;
+    const user = usernameInput.value;
+    const roomName = currentRoomName.textContent;
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("JoinRoom", user, roomName)
@@ -230,8 +250,8 @@ function joinRoom() {
 
 async function createRoom() {
     displayMain();
-    var user = usernameInput.value;
-    var roomName = roomNameInput.value;
+    const user = usernameInput.value;
+    const roomName = roomNameInput.value;
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("CreateRoom", user, roomName)
@@ -252,9 +272,9 @@ async function createRoom() {
 
 async function createTemporaryRoom() {
     displayMain();
-    var user = usernameInput.value;
-    var timer = Number(roomDuration.value);
-    var roomName = temporaryRoomName.value;
+    const user = usernameInput.value;
+    const timer = Number(roomDuration.value);
+    const roomName = temporaryRoomName.value;
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName && timer) {
         connection.invoke("CreateRoom", user, roomName).then(async function () {
@@ -300,8 +320,8 @@ function joinRoomInternal(user, roomName) {
 
 function deleteRoom() {
     displayMain();
-    var user = usernameInput.value;
-    var roomName = roomNameInput.value;
+    const user = usernameInput.value;
+    const roomName = roomNameInput.value;
 
     if (connection.state === signalR.HubConnectionState.Connected && user && roomName) {
         connection.invoke("DeleteRoom", user, roomName)
@@ -319,9 +339,9 @@ function deleteRoom() {
 }
 
 async function removeMember() {
-    var user = usernameInput.value;
-    var roomName = currentRoom;
-    var memberToRemove = removeMemberInput.value;
+    const user = usernameInput.value;
+    const roomName = currentRoom;
+    const memberToRemove = removeMemberInput.value;
     
     if (connection.state === signalR.HubConnectionState.Connected && roomName && user && memberToRemove) {
         try {
@@ -344,7 +364,7 @@ async function switchRoom(roomName) {
     await updateMemberList(roomName);
     await updateUIOnRoomSelection(usernameInput.value, roomName);
 
-    var isJoined = members[currentRoom] && members[currentRoom].includes(usernameInput.value);
+    const isJoined = members[currentRoom] && members[currentRoom].includes(usernameInput.value);
     joinRoomButton.style.display = isJoined ? "none" : "block";
 }
 
@@ -352,21 +372,21 @@ async function switchRoom(roomName) {
 function displayMessages(roomName) {
     messageList.innerHTML = '';
 
-    var roomMessages = messages[roomName] || [];
-    var maxMessagesToShow = 50;
+    const roomMessages = messages[roomName] || [];
+    const maxMessagesToShow = 50;
 
 
-    var startIndex = Math.max(roomMessages.length - maxMessagesToShow, 0);
-    var displayedMessages = roomMessages.slice(startIndex);
+    const startIndex = Math.max(roomMessages.length - maxMessagesToShow, 0);
+    const displayedMessages = roomMessages.slice(startIndex);
 
     displayedMessages.forEach(function (message) {
-        var li = document.createElement("li");
+        const li = document.createElement("li");
 
 
         if (message.includes(': ')) {
-            var messageParts = message.split(': ');
-            var sender = messageParts[0].trim();
-            var messageContent = messageParts.slice(1).join(': ').trim();
+            const messageParts = message.split(': ');
+            const sender = messageParts[0].trim();
+            const messageContent = messageParts.slice(1).join(': ').trim();
 
             li.textContent = `${sender}: ${messageContent}`;
             
@@ -390,7 +410,7 @@ function addRoomToList(roomName) {
         return;
     }
 
-    var roomListItem = document.createElement("button");
+    const roomListItem = document.createElement("button");
     roomListItem.className = "roomListItem";
     roomListItem.textContent = roomName;
     roomListItem.id = roomName;
@@ -408,9 +428,9 @@ async function switchRoomUI(roomName) {
     await clearMessages();
     roomMembersList.style.display = "none";
 
-    var user = usernameInput.value;
+    const user = usernameInput.value;
     
-    var isJoined = members[currentRoom] && members[currentRoom].includes(user);
+    const isJoined = members[currentRoom] && members[currentRoom].includes(user);
 
     if (isJoined) {
         joinRoomButton.style.display = "none";
@@ -432,7 +452,7 @@ function clearMessages() {
 }
 
 async function removeRoomFromList(roomName) {
-    var roomListItem = document.getElementById(roomName);
+    const roomListItem = document.getElementById(roomName);
     if (roomListItem) {
         await roomListItem.remove();
     }
@@ -447,15 +467,15 @@ async function removeRoomFromList(roomName) {
 }
 
 function updateMemberList(roomName) {
-    var roomMembers = members[roomName] || [];
+    const roomMembers = members[roomName] || [];
     memberList.innerHTML = '';
 
-    var maxMembersToShow = 20;
-    var startIndex = Math.max(roomMembers.length - maxMembersToShow, 0);
-    var displayedMembers = roomMembers.slice(startIndex);
+    const maxMembersToShow = 20;
+    const startIndex = Math.max(roomMembers.length - maxMembersToShow, 0);
+    const displayedMembers = roomMembers.slice(startIndex);
 
     displayedMembers.forEach(function (member) {
-        var li = document.createElement("li");
+        const li = document.createElement("li");
         li.textContent = member;
 
         if (roomOwners[roomName] && member === roomOwners[roomName]) {
@@ -473,9 +493,9 @@ function updateMemberList(roomName) {
 
 function updateUIOnRoomSelection(user, roomName) {
     displayMain();
-    var roomMembers = members[roomName] || [];
+    const roomMembers = members[roomName] || [];
 
-    var isMember = roomMembers.includes(user);
+    const isMember = roomMembers.includes(user);
 
     if (isMember) {
         messageInput.disabled = false;
@@ -507,15 +527,15 @@ function displayMain(){
 }
 
 function displayMembers(){
-    var user = usernameInput.value;
-    var roomName = currentRoomName.textContent;
+    const user = usernameInput.value;
+    const roomName = currentRoomName.textContent;
     
     roomMembersList.style.display = 'block';
     messageContainer.style.display = 'none';
 
     if (roomOwners[roomName] !== user){
         removeMemberButton.style.display = 'none';
-        removeMemberInput.style.display = 'none';
+        removeMemberInput.style.display = 'block';
     }
     else{
         removeMemberButton.style.display = 'block';
@@ -531,6 +551,24 @@ function displayRoomContainer(){
     temporaryRoomContainer.style.display = 'block';
     roomContainer.style.margin = 'auto';
     temporaryRoomContainer.style.margin = 'auto';
+}
+
+async function muteMember() {
+    const user = usernameInput.value;
+    const roomName = currentRoom;
+    const memberToMute = removeMemberInput.value;
+
+    if (connection.state === signalR.HubConnectionState.Connected && roomName && user && memberToMute) {
+        try {
+            await connection.invoke("MuteMember", user, roomName, memberToMute);
+        } catch (err) {
+            console.error(err.toString());
+        }
+    } else {
+        console.error("Connection is not in 'Connected' state, or no room selected, or username/member to mute is empty.");
+    }
+
+    removeMemberInput.value = '';
 }
 
 function cleanMessageContainer(){
