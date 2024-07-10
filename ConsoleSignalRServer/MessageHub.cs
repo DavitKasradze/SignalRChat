@@ -62,12 +62,12 @@ namespace ConsoleSignalRServer
         {
             if (!RoomData.TryGetValue(roomName, out var roomData) || !roomData.Members.Contains(user))
             {
-                throw new MembershipValidation();
+                throw new MembershipValidationException();
             }
     
             if (roomData.MutedMembers.Contains(user))
             {
-                throw new MutedMember();
+                throw new MutedMemberException();
             }
     
             var fullMessage = $"{user}: {message}";
@@ -122,7 +122,7 @@ namespace ConsoleSignalRServer
         {
             if (RoomData.ContainsKey(roomName))
             {
-                throw new RoomExists();
+                throw new RoomExistsException();
             }
 
             Rooms.Add(roomName);
@@ -152,7 +152,7 @@ namespace ConsoleSignalRServer
             }
             else
             {
-                throw new RoomOwnerValidation();
+                throw new RoomOwnerValidationException();
             }
         }
 
@@ -192,7 +192,7 @@ namespace ConsoleSignalRServer
         {
             if (memberToRemove == owner)
             {
-                throw new SelfRemoval();
+                throw new SelfRemovalException();
             }
 
             if (RoomData.TryGetValue(roomName, out var roomData) && roomData.Owner == owner)
@@ -216,12 +216,12 @@ namespace ConsoleSignalRServer
                 }
                 else
                 {
-                    throw new NotRoomMember(memberToRemove);
+                    throw new NotRoomMemberException(memberToRemove);
                 }
             }
             else
             {
-                throw new RoomOwnerValidation();
+                throw new RoomOwnerValidationException();
             }
         }
 
@@ -238,7 +238,7 @@ namespace ConsoleSignalRServer
         {
             if (user == memberToMute)
             {
-                throw new SelfMute();
+                throw new SelfMuteException();
             }
 
             if (RoomData.TryGetValue(roomName, out var roomData))
@@ -274,7 +274,7 @@ namespace ConsoleSignalRServer
         {
             if (string.IsNullOrEmpty(user))
             {
-                throw new EmptyUsername();
+                throw new EmptyUsernameException();
             }
 
             if (UserData.ContainsKey(user))

@@ -2,7 +2,7 @@ using ConsoleSignalRServer.Models;
 
 namespace ConsoleSignalRServer.ErrorMessages;
 
-public class RoomOwnerValidation() : ActionErrors(NotRoomOwnerMessage)
+public class RoomOwnerValidationException() : ChatAppException(NotRoomOwnerMessage)
 {
     private const string NotRoomOwnerMessage = "You are not the owner of this room.";
 }

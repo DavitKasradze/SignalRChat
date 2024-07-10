@@ -15,7 +15,7 @@ public class ExceptionFilter : IHubFilter
         {
             return await next(invocationContext);
         }
-        catch (ActionErrors ex)
+        catch (ChatAppException ex)
         {
             await invocationContext.Hub.Clients.Caller.SendAsync(errorMessage, ex.Message);
             return null;
