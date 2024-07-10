@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using ConsoleSignalRServer.Models;
 
 namespace ConsoleSignalRServer.Filters;
 
@@ -14,7 +15,7 @@ public class ExceptionFilter : IHubFilter
         {
             return await next(invocationContext);
         }
-        catch (Models.ExceptionMessages ex)
+        catch (ActionErrors ex)
         {
             await invocationContext.Hub.Clients.Caller.SendAsync(errorMessage, ex.Message);
             return null;
