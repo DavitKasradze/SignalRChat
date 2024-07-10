@@ -28,8 +28,13 @@ namespace ConsoleSignalRServer
 
         public override async Task OnConnectedAsync()
         {
-            var connectionId = Context.ConnectionId;
-            var user = UserData.FirstOrDefault(u => u.Value.ConnectionId == connectionId).Key;
+            var httpContext = Context.GetHttpContext();
+            string user = null;
+
+            if (httpContext != null)
+            {
+                user = httpContext.Request.Query["username"];
+            }
 
             if (!string.IsNullOrEmpty(user))
             {

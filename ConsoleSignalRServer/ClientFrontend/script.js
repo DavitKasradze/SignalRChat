@@ -54,7 +54,7 @@ deleteRoomButton.addEventListener("click", async function () {
     await deleteRoom();
 });
 
-registerButton.addEventListener("click", async () => {
+registerButton.addEventListener("click", async function () {
     await registerUser();
 });
 
@@ -155,6 +155,8 @@ connection.on("ReceiveExistingMessages", async function (roomName, existingMessa
 });
 
 connection.on("UserRegistered", async (username) => {
+    const newUrl = window.location.href + '?username=' + encodeURIComponent(username);
+    window.history.replaceState({ path: newUrl }, '', newUrl);
     registerRoomForm.style.display = "none";
     roomListContainer.style.display = "block";
     messageContainer.style.display = "block";
