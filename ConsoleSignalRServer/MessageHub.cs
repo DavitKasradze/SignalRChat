@@ -39,8 +39,9 @@ namespace ConsoleSignalRServer
             if (!string.IsNullOrEmpty(user))
             {
                 await Clients.Caller.SendAsync("UserAlreadyRegistered", user);
-                await Clients.Caller.SendAsync("AllRooms", Rooms);
             }
+            
+            await Clients.Caller.SendAsync("AllRooms", Rooms);
 
             await base.OnConnectedAsync();
         }
@@ -60,14 +61,12 @@ namespace ConsoleSignalRServer
         {
             if (!RoomData.TryGetValue(roomName, out var roomData) || !roomData.Members.Contains(user))
             {
-                await Clients.Caller.SendAsync("ErrorMessage", "You are not a member of this room.");
-                return;
+                throw new ExceptionMessages.MembershipValidationException();
             }
     
             if (roomData.MutedMembers.Contains(user))
             {
-                await Clients.Caller.SendAsync("ErrorMessage", "You are muted in this room and cannot send messages.");
-                return;
+                throw new ExceptionMessages.MutedMemberException();
             }
     
             var fullMessage = $"{user}: {message}";
@@ -122,9 +121,7 @@ namespace ConsoleSignalRServer
         {
             if (RoomData.ContainsKey(roomName))
             {
-                await Clients.Caller.SendAsync("ErrorMessage",
-                    "Room name already exists. Please choose a different room name.");
-                return;
+                throw new ExceptionMessages.RoomExistsException();
             }
 
             Rooms.Add(roomName);
@@ -154,7 +151,7 @@ namespace ConsoleSignalRServer
             }
             else
             {
-                await Clients.Caller.SendAsync("ErrorMessage", "You are not the owner of this room.");
+                throw new ExceptionMessages.RoomOwnerValidationException();
             }
         }
 
@@ -194,8 +191,7 @@ namespace ConsoleSignalRServer
         {
             if (memberToRemove == owner)
             {
-                await Clients.Caller.SendAsync("ErrorMessage", "You cannot remove yourself as a member.");
-                return;
+                throw new ExceptionMessages.SelfRemovalException();
             }
 
             if (RoomData.TryGetValue(roomName, out var roomData) && roomData.Owner == owner)
@@ -216,20 +212,15 @@ namespace ConsoleSignalRServer
                     {
                         await Groups.RemoveFromGroupAsync(userData.ConnectionId, roomName);
                     }
-                    else
-                    {
-                        await Clients.Caller.SendAsync("ErrorMessage",
-                            $"{memberToRemove} is not registered in the room.");
-                    }
                 }
                 else
                 {
-                    await Clients.Caller.SendAsync("ErrorMessage", $"{memberToRemove} is not a member of this room.");
+                    throw new ExceptionMessages.NotARoomMemberException(memberToRemove);
                 }
             }
             else
             {
-                await Clients.Caller.SendAsync("ErrorMessage", "You are not the owner of this room.");
+                throw new ExceptionMessages.RoomOwnerValidationException();
             }
         }
 
@@ -246,8 +237,7 @@ namespace ConsoleSignalRServer
         {
             if (user == memberToMute)
             {
-                await Clients.Caller.SendAsync("ErrorMessage", "You cannot mute yourself as a member.");
-                return;
+                throw new ExceptionMessages.SelfMuteException();
             }
 
             if (RoomData.TryGetValue(roomName, out var roomData))
@@ -283,8 +273,7 @@ namespace ConsoleSignalRServer
         {
             if (string.IsNullOrEmpty(user))
             {
-                await Clients.Caller.SendAsync("ErrorMessage", "Username cannot be empty.");
-                return false;
+                throw new ExceptionMessages.EmptyUsernameException();
             }
 
             if (UserData.ContainsKey(user))

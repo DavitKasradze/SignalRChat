@@ -1,6 +1,8 @@
-﻿using ConsoleSignalRServer.HubServices;
+﻿using ConsoleSignalRServer.Filters;
+using ConsoleSignalRServer.HubServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -10,8 +12,11 @@ namespace ConsoleSignalRServer
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSignalR();
-            services.AddSingleton<RoomDeletionService>();
+            services.AddSignalR(options =>
+            {
+                options.AddFilter<ExceptionFilter>();
+            });;
+            services.AddSingleton<RoomDeletionService>(); 
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(builder =>
@@ -32,6 +37,7 @@ namespace ConsoleSignalRServer
             }
 
             app.UseRouting();
+            app.UseStaticFiles();
             app.UseCors();
             app.UseEndpoints(endpoints =>
             {
