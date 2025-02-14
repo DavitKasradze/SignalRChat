@@ -1,5 +1,4 @@
 ﻿using ConsoleSignalRServer.Filters;
-using ConsoleSignalRServer.HubServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
@@ -16,7 +15,6 @@ namespace ConsoleSignalRServer
             {
                 options.AddFilter<ExceptionFilter>();
             });;
-            services.AddSingleton<RoomDeletionService>(); 
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(builder =>
@@ -41,7 +39,7 @@ namespace ConsoleSignalRServer
             app.UseCors();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHub<MessageHub>("/messageHub");
+                endpoints.MapHub<ScoreboardHub>("/scoreboardHub");
             });
         }
     }

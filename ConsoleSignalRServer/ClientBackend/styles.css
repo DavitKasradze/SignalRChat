@@ -1,0 +1,366 @@
+#roomListContainer,
+#roomContainer,
+#temporaryRoomContainer,
+#messageContainer,
+#manageMemberButton,
+#joinRoomButton,
+#roomMembersList,
+#messageContainer{
+    display: none;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1a1d21;
+}
+
+.input-group {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+}
+
+#roomMembersList {
+    background: #002036;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    display: none;
+    position: absolute;
+    left: 50%;
+}
+
+#roomMembersList h2 {
+    color: #cccccc;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+#roomMembersList ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#roomMembersList ul li {
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#roomMembersList ul li.owner {
+    font-weight: bold;
+    color: gold;
+}
+
+#roomMembersList ul li.member {
+    color: white;
+}
+
+#roomMembersList .input-group {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+}
+
+#roomMembersList input[type="text"],
+#roomMembersList button {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: #222529;
+    color: #cccccc;
+    border: 1px solid #ccc; 
+}
+
+#roomMembersList button {
+    background-color: #36637d;
+    color: white;
+    cursor: pointer;
+    border: none;
+}
+
+#roomMembersList button:hover {
+    background-color: #0056b3;
+}
+
+#sendButton {
+    width: 53px;
+    padding: 10px;
+    background-color: #36637d;
+    color: white;
+    cursor: pointer;
+    margin: 2%;
+}
+
+#sendButton:hover {
+    background-color: #0056b3;
+}
+
+.input-group label {
+    margin-bottom: 5px;
+}
+
+.input-group input[type="text"],
+.input-group input[type="number"],
+.input-group button {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.input-group input[type="text"],
+.input-group input[type="number"] {
+    background-color: #222529;
+    color: #cccccc;
+}
+
+.input-group button {
+    background-color: #36637d;
+    color: white;
+    cursor: pointer;
+}
+
+.input-group button:hover {
+    background-color: #0056b3;
+}
+
+#registerRoomForm {
+    background: #002036;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+}
+
+#roomListContainer {
+    width: 20%;
+    background: #0a2331;
+    color: #f8f8f8;
+    padding: 1%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#roomListContainer h2 {
+    margin: 0 0 20px;
+}
+
+#manageRoomButton {
+    align-self: flex-end;
+    position: absolute;
+    margin: 5px;
+    bottom: 5%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#roomList {
+    flex-grow: 1;
+}
+
+#roomList button {
+    width: 100%;
+    padding: 10px;
+    background-color: #36637d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+#roomList button:hover {
+    background-color: #0056b3;
+}
+
+#messageContainer {
+    width: 76%;
+    background: #1a1d21;
+    color: #f8f8f8;
+    padding: 1%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#sendButton {
+    margin: 10px;
+    padding: 10px;
+    position: absolute;
+    bottom: 10%;
+    right: 1%;
+    background-color: #36637d;
+    color: white;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+}
+
+#messageContainer h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+#messageList {
+    list-style-type: none;
+    padding: 0;
+    overflow-y: auto;
+    max-height: calc(100% - 130px); 
+}
+
+#messageInput {
+    flex-grow: 1;
+    position: absolute;
+    margin-right: 1%; 
+    padding: 10px;
+    width: 92%;
+    bottom: 10%;
+    background-color: #222529;
+    color: #f8f8f8;
+    border: none; 
+}
+
+#sendButton,
+#createRoomButton,
+#deleteRoomButton,
+#createTemporaryRoomButton,
+#registerButton,
+#joinRoomButton,
+#manageRoomButton,
+#manageMemberButton {
+    background-color: #36637d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#sendButton:hover,
+#manageMemberButton:hover,
+#createRoomButton:hover,
+#deleteRoomButton:hover,
+#createTemporaryRoomButton:hover,
+#registerButton:hover,
+#joinRoomButton:hover,
+#manageRoomButton:hover{
+    background-color: #0056b3;
+}
+
+#messageList li {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.user-message {
+    background-color: #002036;
+}
+
+.other-message {
+    background-color: #212428;
+}
+
+#currentRoomName {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center; /* Center text */
+}
+
+#joinRoomButton {
+    margin-bottom: 50px;
+    margin-top: 10px;
+}
+
+#manageMemberButton {
+    position: absolute;
+    margin: 5px;
+    bottom: 5%;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#roomContainer {
+    background: #002036;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    left: 40%;
+}
+
+#temporaryRoomContainer {
+    background: #002036;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    right: 20%;
+}
+
+#roomContainer .input-group,
+#temporaryRoomContainer .input-group {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#roomContainer label,
+#temporaryRoomContainer label {
+    margin-bottom: 5px;
+}
+
+#roomContainer input[type="text"],
+#roomContainer input[type="number"],
+#roomContainer button,
+#temporaryRoomContainer input[type="text"],
+#temporaryRoomContainer input[type="number"],
+#temporaryRoomContainer button {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: #222529;
+    color: #cccccc;
+}
+
+#roomContainer button,
+#temporaryRoomContainer button {
+    background-color: #36637d;
+    color: white;
+    cursor: pointer;
+    border: none; /* Removed border from buttons */
+}
+
+#roomContainer button:hover,
+#temporaryRoomContainer button:hover {
+    background-color: #0056b3;
+}
+
+#memberList {
+    
+}

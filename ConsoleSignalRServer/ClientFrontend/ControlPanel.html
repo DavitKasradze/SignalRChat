@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel</title>
+    <link rel="stylesheet" href="../Assets/CSS/Control-Panel.css">
+</head>
+<body>
+<div class="control-panel">
+    <h2>Scoreboard Control Panel</h2>
+
+    <div class="section">
+        <h3>Player 1</h3>
+        <label for="clanPrefix1"></label><input type="text" id="clanPrefix1" placeholder="Clan Prefix">
+        <label for="name1"></label><input type="text" id="name1" placeholder="Player 1 Name">
+        <label for="score1"></label><input type="number" id="score1" placeholder="Score" value="0">
+        <label for="country1"></label><input type="number" id="country1" placeholder="Country">
+        <label for="character1"></label><input type="text" id="character1" placeholder="Character Image URL">
+    </div>
+
+    <div class="section">
+        <h3>Player 2</h3>
+        <label for="clanPrefix2"></label><input type="text" id="clanPrefix2" placeholder="Clan Prefix">
+        <label for="name2"></label><input type="text" id="name2" placeholder="Player 2 Name">
+        <label for="score2"></label><input type="number" id="score2" placeholder="Score" value="0">
+        <label for="country2"></label><input type="number" id="country2" placeholder="Country">
+        <label for="character2"></label><input type="text" id="character2" placeholder="Character Image URL">
+    </div>
+
+    <div class="section">
+        <h3>Round Info</h3>
+        <input type="text" id="round" placeholder="Round (e.g., Grand Finals)">
+    </div>
+
+    <div class="section">
+        <h3>Upcoming Match</h3>
+        <label for="upcoming1"></label><input type="text" id="upcoming1" placeholder="Upcoming Player 1">
+        <label for="upcoming2"></label><input type="text" id="upcoming2" placeholder="Upcoming Player 2">
+    </div>
+
+    <div class="section">
+        <h3>Prize Pool</h3>
+        <label for="prizePool"></label><input type="text" id="prizePool" placeholder="Prize Pool (e.g., $1500)">
+    </div>
+
+    <button id="updateScoreboard">Update Scoreboard</button>
+</div>
+
+<script src="ControlPanel.js"></script>
+</body>
+</html>
