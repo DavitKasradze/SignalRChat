@@ -1,3 +1,5 @@
+"use strict";
+
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5000/scoreboardHub")
     .build();
