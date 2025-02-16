@@ -6,21 +6,15 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-image: url('../Images/Zaibatsu.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-color: #1d1f26;
     color: #ecf0f1;
     text-align: center;
 }
 
-h3 {
-    color: #ffd700; /* Gold color */
+h4 {
+    color: #ecf0f1; /* Gold color */
     font-family: 'Arial', sans-serif; /* Clean and modern font */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); /* Slight shadow for depth */
-    padding: 10px;
-    border-radius: 8px; /* Rounded corners */
-    font-size: 24px; /* Increase font size */
+    font-size: 16px; /* Increase font size */
     text-align: center; /* Center the text */
 }
 
@@ -172,7 +166,7 @@ h3 {
 
 .score-btn
 {
-    background-color: #3498db;
+    background-color: #284cb8;
     color: #fff;
     border: none;
     padding: 10px 15px;
@@ -185,11 +179,11 @@ h3 {
 
 .score-btn:hover
 {
-    background-color: #2980b9;
+    background-color: #476bd7;
 }
 
 button#updateScoreboard {
-    background-color: #e74c3c;
+    background-color: #c0392b;
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -201,5 +195,5 @@ button#updateScoreboard {
 }
 
 button#updateScoreboard:hover {
-    background-color: #c0392b;
+    background-color: #e74c3c;
 }
