@@ -5,34 +5,41 @@ let connection = new signalR.HubConnectionBuilder()
     .build();
 
 connection.on("ReceiveScoreboardUpdate", (input) => {
-    // Player 1 Section
-    document.getElementById("clanPrefixOne").innerText = input.clanPrefix1;
-    document.getElementById("nameOne").innerText = input.name1;
-    document.getElementById("scoreOne").innerText = input.score1;
-    document.getElementById("countryOne").innerText = input.country1;
-    document.getElementById("upcomingCharacterOne").innerText = input.character1;
+    function updateElement(id, value) {
+        let element = document.getElementById(id);
+        if (element) {
+            element.innerText = value;
+        }
+    }
 
-    // Player 2 Section
-    document.getElementById("clanPrefixTwo").innerText = input.clanPrefix2;
-    document.getElementById("nameTwo").innerText = input.name2;
-    document.getElementById("scoreTwo").innerText = input.score2;
-    document.getElementById("countryTwo").innerText = input.country2;
-    document.getElementById("upcomingCharacterTwo").innerText = input.character2;
+    // Player 1
+    updateElement("clanPrefixOne", input.clanPrefixOne);
+    updateElement("nameOne", input.nameOne);
+    updateElement("scoreOne", input.scoreOne);
+    updateElement("countryOne", input.countryOne);
 
-    // Round and prize pool
-    document.getElementById("currentRound").innerText = input.round;
-    document.getElementById("prizePool").innerText = input.prizePool;
+    // Player 2
+    updateElement("clanPrefixTwo", input.clanPrefixTwo);
+    updateElement("nameTwo", input.nameTwo);
+    updateElement("scoreTwo", input.scoreTwo);
+    updateElement("countryTwo", input.countryTwo);
 
-    // Upcoming match information
-    document.getElementById("upcomingPrefixOne").innerText = input.upcomingPrefix1;
-    document.getElementById("upcomingNameOne").innerText = input.upcomingName1;
-    document.getElementById("upcomingCountryOne").innerText = input.upcomingCountry1;
+    // Round & Prize Pool
+    updateElement("currentRound", input.currentRound);
+    updateElement("prizePool", input.prizePool);
 
-    document.getElementById("upcomingPrefixTwo").innerText = input.upcomingPrefix2;
-    document.getElementById("upcomingNameTwo").innerText = input.upcomingName2;
-    document.getElementById("upcomingCountryTwo").innerText = input.upcomingCountry2;
+    // Upcoming Match
+    updateElement("upcomingPrefixOne", input.upcomingPrefixOne);
+    updateElement("upcomingNameOne", input.upcomingNameOne);
+    updateElement("upcomingCountryOne", input.upcomingCountryOne);
+    updateElement("upcomingCharacterOne", input.upcomingCharacterOne);
 
-    document.getElementById("upcomingRound").innerText = input.upcomingRound;
+    updateElement("upcomingPrefixTwo", input.upcomingPrefixTwo);
+    updateElement("upcomingNameTwo", input.upcomingNameTwo);
+    updateElement("upcomingCountryTwo", input.upcomingCountryTwo);
+    updateElement("upcomingCharacterTwo", input.upcomingCharacterTwo);
+
+    updateElement("upcomingRound", input.upcomingRound);
 });
 
 
