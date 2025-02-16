@@ -7,25 +7,25 @@ let connection = new signalR.HubConnectionBuilder()
 
 document.getElementById("updateScoreboard").addEventListener("click", () => {
     const scoreboardInput = {
-        clanPrefix1: document.getElementById("clanPrefix1").value,
-        name1: document.getElementById("name1").value,
-        score1: parseInt(document.getElementById("score1").value) || 0,
-        country1: document.getElementById("country1").value,
-        character1: document.getElementById("upcomingCharacter1").value,
-        clanPrefix2: document.getElementById("clanPrefix2").value,
-        name2: document.getElementById("name2").value,
-        score2: parseInt(document.getElementById("score2").value) || 0,
-        country2: document.getElementById("country2").value,
-        character2: document.getElementById("upcomingCharacter2").value,
-        round: document.getElementById("round").value,
+        clanPrefixOne: document.getElementById("clanPrefixOne").value,
+        nameOne: document.getElementById("nameOne").value,
+        scoreOne: parseInt(document.getElementById("scoreOne").value) || 0,
+        countryOne: document.getElementById("countryOne").value,
+        upcomingCharacterOne: document.getElementById("upcomingCharacterOne").value,
+        clanPrefixTwo: document.getElementById("clanPrefixTwo").value,
+        nameTwo: document.getElementById("nameTwo").value,
+        scoreTwo: parseInt(document.getElementById("scoreTwo").value) || 0,
+        countryTwo: document.getElementById("countryTwo").value,
+        upcomingCharacterTwo: document.getElementById("upcomingCharacterTwo").value,
+        currentRound: document.getElementById("currentRound").value,
         prizePool: document.getElementById("prizePool").value,
-        upcomingPrefix1: document.getElementById("upcomingPrefix1").value,
-        upcomingName1: document.getElementById("upcomingName1").value,
-        upcomingCountry1: document.getElementById("upcomingCountry1").value,
-        upcomingPrefix2: document.getElementById("upcomingPrefix2").value,
-        upcomingName2: document.getElementById("upcomingName2").value,
-        upcomingCountry2: document.getElementById("upcomingCountry2").value,
-        upcomingRound: document.getElementById("upcomingRound").value // Added upcoming round
+        upcomingPrefixOne: document.getElementById("upcomingPrefixOne").value,
+        upcomingNameOne: document.getElementById("upcomingNameOne").value,
+        upcomingCountryOne: document.getElementById("upcomingCountryOne").value,
+        upcomingPrefixTwo: document.getElementById("upcomingPrefixTwo").value,
+        upcomingNameTwo: document.getElementById("upcomingNameTwo").value,
+        upcomingCountryTwo: document.getElementById("upcomingCountryTwo").value,
+        upcomingRound: document.getElementById("upcomingRound").value 
     };
 
     connection.invoke("UpdateScoreboard", scoreboardInput)

@@ -39,7 +39,7 @@ h3 {
     align-items: center;
 }
 
-#round,
+#currentRound,
 #prizePool
 {
     width: 49%;
