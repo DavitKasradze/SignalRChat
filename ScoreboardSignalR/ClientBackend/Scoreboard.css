@@ -1,13 +1,85 @@
-body {
-    font-family: Arial, sans-serif;
+/*body {*/
+/*    font-family: Arial, sans-serif;*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    height: 100vh;*/
+/*    background-image: url('../Images/singles-overlay.png');*/
+/*    background-size: cover;*/
+/*    background-position: center;*/
+/*    background-repeat: no-repeat;*/
+/*}*/
+
+/* Resetting some default styling for better control */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+/* General body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-image: url('../Images/singles-overlay.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    margin: 0;
+}
+
+/* Scoreboard container */
+.scoreboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 80%;
+    max-width: 1000px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for player sections */
+.playerOneSection, .playerTwoSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 45%;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Round section */
+.roundSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 10%;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for each span element */
+span {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #333;
+    padding: 4px 0;
+}
+
+/* Optional: Styling for the headings in the round section */
+.roundSection h3 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: #444;
 }

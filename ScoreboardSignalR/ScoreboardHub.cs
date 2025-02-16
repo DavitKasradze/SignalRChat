@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
-using ConsoleSignalRServer.Models;
+using ScoreboardSignalR.Models;
 
 namespace ScoreboardSignalR;
 
