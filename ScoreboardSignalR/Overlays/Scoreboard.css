@@ -1,32 +1,118 @@
+/*body {*/
+/*    font-family: Roboto, sans-serif;*/
+/*    font-weight: bold;*/
+/*    height: 100vh;*/
+/*    background-image: url('../Images/singles-overlay.png');*/
+/*    background-size: cover;*/
+/*    background-position: center;*/
+/*    background-repeat: no-repeat;*/
+/*}*/
+
+/*#clanPrefixOne,*/
+/*#clanPrefixTwo{*/
+/*    color: red;*/
+/*    font-size: 28px;*/
+/*}*/
+
+/*#nameOne,*/
+/*#nameTwo{*/
+/*    color: black;*/
+/*    font-size: 28px;*/
+/*}*/
+
+/*#currentRound{*/
+/*    color: silver;*/
+/*    font-size: 28px;*/
+/*}*/
+
+/*#scoreOne,*/
+/*#scoreTwo{*/
+/*    color: silver;*/
+/*    font-size: 42px;*/
+/*}*/
+
 body {
-    font-family: Roboto, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+}
+
+.scoreboard {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.header {
+    /*Sizes of backround image*/
+    height: 67px;
+    width: 1536px;
+
+    box-sizing: border-box;
+    background: url("../Images/singles-overlay.png") no-repeat top;
     font-weight: bold;
-    height: 100vh;
-    background-image: url('../Images/singles-overlay.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    font-size: 28px;
+    text-shadow: 1px 1px 2px pink;
+    text-transform: uppercase;
+    text-align: center;
+    position: relative;
 }
 
-#clanPrefixOne,
-#clanPrefixTwo{
+header > * {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.player-score {
+    width: 125px;
+    font-size: 36px;
+    color: #fff;
+}
+
+.player {
+    font-weight: 600;
+}
+
+.round {
+    color: #fff;
+}
+
+.clan-prefix {
     color: red;
-    font-size: 28px;
 }
 
-#nameOne,
-#nameTwo{
-    color: black;
-    font-size: 28px;
+.character-img {
+    max-width: 28px;
+    max-height: 28px;
+    object-fit: cover;
 }
 
-#currentRound{
-    color: silver;
-    font-size: 28px;
+/*positions*/
+
+#score1 {
+    left: 50px;
 }
 
-#scoreOne,
-#scoreTwo{
-    color: silver;
-    font-size: 42px;
+#score2 {
+    right: 50px;
+}
+
+/*score position (50px) + score width (125px)*/
+#player1 {
+    left: 175px;
+}
+
+#player2 {
+    right: 175px;
+}
+
+/*position in center*/
+#round {
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+/*divide parent element size without scores to 3 equal parts*/
+.player, #round {
+    width: calc((100% - 350px) / 3);
 }

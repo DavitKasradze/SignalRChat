@@ -1,16 +1,27 @@
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="./Scoreboard.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Singles</title>
+    <link rel="stylesheet" href="./Scoreboard.css">
 </head>
-    <div class="scoreboard" id="headerSection">
-            <p><span id="scoreOne"></span></p>
-            <p><span id="clanPrefixOne"></span></p>
-            <p><span id="nameOne"></span></p>
-            <p><span id="currentRound"></span></p>
-            <p><span id="clanPrefixTwo"></span></p>
-            <p><span id="nameTwo"></span></p>
-            <p><span id="scoreTwo"></span></p>
-    </div>
+<body>
+<div id="scoreboard" class="scoreboard">
+    <header class="header">
+        <span class="player-score" id="scoreOne"></span>
+        <div class="player" id="player1">
+            <span class="clan-prefix" id="clanPrefixOne"></span>
+            <span class="player-name" id="nameOne"></span>
+        </div>
+        <div class="round" id="currentRound"></div>
+        <div class="player" id="player2">
+            <span class="clan-prefix" id="clanPrefixTwo"></span>
+            <span class="player-name" id="nameTwo"></span>
+        </div>
+        <span class="player-score" id="scoreTwo"></span>
+    </header>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script src="./Scoreboard.js"></script>
+</body>
+</html>

@@ -13,33 +13,6 @@ connection.start().then(() => {
     console.error("Connection failed: ", err);
 });
 
-// connection.on("ReceiveInitialData", (input) => {
-//     // Handle the received initial data and update the UI
-//     document.getElementById("clanPrefixOne").innerText = input.clanPrefixOne || '';
-//     document.getElementById("nameOne").innerText = input.nameOne || '';
-//     document.getElementById("scoreOne").innerText = input.scoreOne || '';
-//     document.getElementById("countryOne").innerText = input.countryOne || '';
-//
-//     document.getElementById("clanPrefixTwo").innerText = input.clanPrefixTwo || '';
-//     document.getElementById("nameTwo").innerText = input.nameTwo || '';
-//     document.getElementById("scoreTwo").innerText = input.scoreTwo || '';
-//     document.getElementById("countryTwo").innerText = input.countryTwo || '';
-//
-//     document.getElementById("currentRound").innerText = input.currentRound || '';
-//     document.getElementById("prizePool").innerText = input.prizePool || '';
-//
-//     document.getElementById("upcomingPrefixOne").innerText = input.upcomingPrefixOne || '';
-//     document.getElementById("upcomingNameOne").innerText = input.upcomingNameOne || '';
-//     document.getElementById("upcomingCountryOne").innerText = input.upcomingCountryOne || '';
-//     document.getElementById("upcomingCharacterOne").innerText = input.upcomingCharacterOne || '';
-//
-//     document.getElementById("upcomingPrefixTwo").innerText = input.upcomingPrefixTwo || '';
-//     document.getElementById("upcomingNameTwo").innerText = input.upcomingNameTwo || '';
-//     document.getElementById("upcomingCountryTwo").innerText = input.upcomingCountryTwo || '';
-//     document.getElementById("upcomingCharacterTwo").innerText = input.upcomingCharacterTwo || '';
-//
-//     document.getElementById("upcomingRound").innerText = input.upcomingRound || '';
-// });
 connection.on("ReceiveScoreboardUpdate", (input) => {
     function updateElement(id, value) {
         let element = document.getElementById(id);
