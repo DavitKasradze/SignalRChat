@@ -11,10 +11,10 @@ body {
 }
 
 h4 {
-    color: #ecf0f1; /* Gold color */
-    font-family: 'Arial', sans-serif; /* Clean and modern font */
-    font-size: 16px; /* Increase font size */
-    text-align: center; /* Center the text */
+    color: #ecf0f1;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    text-align: center;
 }
 
 .container {
