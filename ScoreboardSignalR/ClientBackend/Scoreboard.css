@@ -11,18 +11,22 @@ body {
 #clanPrefixOne,
 #clanPrefixTwo{
     color: red;
+    font-size: 28px;
 }
 
 #nameOne,
 #nameTwo{
     color: black;
+    font-size: 28px;
 }
 
 #currentRound{
     color: silver;
+    font-size: 28px;
 }
 
 #scoreOne,
 #scoreTwo{
     color: silver;
+    font-size: 42px;
 }
