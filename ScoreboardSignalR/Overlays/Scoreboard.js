@@ -19,6 +19,9 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
         if (element) {
             element.style.transition = 'opacity 0.5s';
             element.style.opacity = '0';
+            if (value.length > 10) {
+                element.style.fontSize = '16px';
+            }
             
             setTimeout(() => {
                 if (id === 'scoreOne' ||id === 'scoreTwo'){

@@ -44,8 +44,8 @@ body {
 
 .header {
     /*Sizes of backround image*/
-    height: 67px;
-    width: 1536px;
+    height: 50px;
+    width: 1150px;
 
     box-sizing: border-box;
     background: url("../Images/singles-overlay.png") no-repeat top;
@@ -64,7 +64,7 @@ header > * {
 }
 
 .player-score {
-    width: 125px;
+    width: 75px;
     font-size: 36px;
     color: #fff;
 }
@@ -87,32 +87,39 @@ header > * {
     object-fit: cover;
 }
 
+.player {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
 /*positions*/
 
-#score1 {
+#scoreOne {
     left: 50px;
 }
 
-#score2 {
+#scoreTwo {
     right: 50px;
 }
 
-/*score position (50px) + score width (125px)*/
-#player1 {
-    left: 175px;
+/*score position (50px) + score width (75px)*/
+#playerOne {
+    left: 125px;
 }
 
-#player2 {
-    right: 175px;
+#playerTwo {
+    right: 125px;
 }
 
 /*position in center*/
-#round {
+#currentRound {
     left: 50%;
     transform: translate(-50%,-50%);
 }
 
 /*divide parent element size without scores to 3 equal parts*/
-.player, #round {
-    width: calc((100% - 350px) / 3);
+.player, #currentRound {
+    width: calc((100% - 250px) / 3);
 }
