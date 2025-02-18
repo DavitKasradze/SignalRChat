@@ -71,6 +71,16 @@ header > * {
     right: 50px;
 }
 
+#countryOne {
+    left: 0;
+    z-index: -1;
+}
+
+#countryTwo {
+    right: 0;
+    z-index: -1;
+}
+
 /*score position (50px) + score width (75px)*/
 #playerOne {
     left: 125px;

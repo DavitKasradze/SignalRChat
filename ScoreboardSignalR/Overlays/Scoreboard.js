@@ -33,17 +33,36 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
         }
     }
 
+    function updateImage(id, value) {
+        let element = document.getElementById(id);
+        if (element) {
+            element.style.transition = 'opacity 0.5s';
+            element.style.opacity = '0';
+
+            setTimeout(() => {
+                let parts = element.src.split("/");
+                if (parts[parts.length - 1] !== "") {
+                    parts[parts.length - 1] = "";
+                }
+                element.src = parts.join("/");
+                
+                element.src = element.src+value+".png";
+                element.style.opacity = '1';
+            }, 500);
+        }
+    }
+
     // Player 1
     updateElement("clanPrefixOne", input.clanPrefixOne);
     updateElement("nameOne", input.nameOne);
     updateElement("scoreOne", input.scoreOne);
-    updateElement("countryOne", input.countryOne);
+    updateImage("countryOne", input.countryOne);
 
     // Player 2
     updateElement("clanPrefixTwo", input.clanPrefixTwo);
     updateElement("nameTwo", input.nameTwo);
     updateElement("scoreTwo", input.scoreTwo);
-    updateElement("countryTwo", input.countryTwo);
+    updateImage("countryTwo", input.countryTwo);
 
     // Round & Prize Pool
     updateElement("currentRound", input.currentRound);
@@ -53,12 +72,12 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
     updateElement("upcomingPrefixOne", input.upcomingPrefixOne);
     updateElement("upcomingNameOne", input.upcomingNameOne);
     updateElement("upcomingCountryOne", input.upcomingCountryOne);
-    updateElement("upcomingCharacterOne", input.upcomingCharacterOne);
+    updateImage("upcomingCharacterOne", input.upcomingCharacterOne);
 
     updateElement("upcomingPrefixTwo", input.upcomingPrefixTwo);
     updateElement("upcomingNameTwo", input.upcomingNameTwo);
     updateElement("upcomingCountryTwo", input.upcomingCountryTwo);
-    updateElement("upcomingCharacterTwo", input.upcomingCharacterTwo);
+    updateImage("upcomingCharacterTwo", input.upcomingCharacterTwo);
 
     updateElement("upcomingRound", input.upcomingRound);
 });
