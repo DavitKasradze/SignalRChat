@@ -10,17 +10,34 @@ body {
 }
 
 .header {
-    height: 80px;
-    width: 1115px;
+    height: 82px;
+    width: 1500px;
 
     box-sizing: border-box;
-    background: url("../Images/Header/HeaderFirst.png") no-repeat top;
+    background: none; /* Start with no background */
     font-weight: bold;
-    font-size: 28px;
-    text-shadow: 1px 1px 2px black;
+
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
     text-transform: uppercase;
     text-align: center;
     position: relative;
+
+    opacity: 0; /* Start hidden */
+    transition: opacity 1s ease-in-out; /* Smooth fade-in */
+
+    animation: loadBackground 0s 2s forwards, fadeIn 1s 2s forwards;
+}
+
+@keyframes loadBackground {
+    to {
+        background: url("../Images/Header/HeaderFirst.png") no-repeat top;
+    }
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
 }
 
 header > * {
@@ -38,11 +55,13 @@ header > * {
 .player {
     font-weight: 600;
     font-family: "Roboto", sans-serif;
+    font-size: 28px;
 }
 
 .round {
     color: #fff;
     font-family: "Roboto", sans-serif;
+    top: 17px;
 }
 
 .clan-prefix {
@@ -66,15 +85,13 @@ header > * {
 /*positions*/
 
 #scoreOne {
-    left: 70px;
-    max-width: 30px;
-    max-height: 45px;
+    left: 90px;
+    max-width: 34px;
 }
 
 #scoreTwo {
-    right: 70px;
-    max-width: 30px;
-    max-height: 45px;
+    right: 90px;
+    max-width: 34px;
 }
 
 #countryOne {
@@ -104,5 +121,5 @@ header > * {
 
 /*divide parent element size without scores to 3 equal parts*/
 .player, #currentRound {
-    width: calc((100% - 250px) / 3);
+    width: calc((100% - 500px) / 3);
 }

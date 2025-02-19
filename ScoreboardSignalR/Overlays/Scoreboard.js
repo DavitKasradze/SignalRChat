@@ -1,5 +1,7 @@
 "use strict";
 
+let isFirstLoad = true;
+
 let connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5000/scoreboardHub")
     .build();
@@ -17,27 +19,33 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
     function updateElement(id, value) {
         let element = document.getElementById(id);
         if (element) {
-            element.style.transition = 'opacity 0.5s';
-            element.style.opacity = '0';
-            if (value.length > 10) {
-                element.style.fontSize = '16px';
-            }
-            
+            let delay = isFirstLoad ? 3000: 500; // 3.7s on load, 0.5s after
+
+            element.style.transition = "opacity 0.5s";
+            element.style.opacity = "0"; // Fade out
+
             setTimeout(() => {
-                if (id === 'scoreOne' ||id === 'scoreTwo'){
+                if (id === "scoreOne" || id === "scoreTwo") {
                     element.innerText = value;
                 }
-                element.innerText = String(value).toUpperCase(); 
-                element.style.opacity = '1'; 
-            }, 500);
+
+                element.innerText = String(value).toUpperCase();
+
+                // Adjust font size dynamically
+                element.style.fontSize = value.length > 12 ? "24px" : "28px";
+
+                element.style.opacity = "1"; // Fade in
+            }, delay);
         }
     }
 
     function updateImage(id, value) {
         let element = document.getElementById(id);
         if (element) {
-            element.style.transition = 'opacity 0.5s';
-            element.style.opacity = '0';
+            let delay = isFirstLoad ? 3000 : 500; // 3.7s on load, 0.5s after
+
+            element.style.transition = "opacity 0.5s";
+            element.style.opacity = "0"; // Fade out
 
             setTimeout(() => {
                 let parts = element.src.split("/");
@@ -45,10 +53,10 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
                     parts[parts.length - 1] = "";
                 }
                 element.src = parts.join("/");
-                
+
                 element.src = element.src+value+".png";
                 element.style.opacity = '1';
-            }, 500);
+            }, delay);
         }
     }
 
@@ -81,3 +89,8 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
 
     updateElement("upcomingRound", input.upcomingRound);
 });
+
+// Once the first update cycle is complete, set isFirstLoad to false
+setTimeout(() => {
+    isFirstLoad = false;
+}, 3700);
