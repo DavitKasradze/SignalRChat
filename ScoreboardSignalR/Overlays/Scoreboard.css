@@ -10,15 +10,14 @@ body {
 }
 
 .header {
-    /*Sizes of backround image*/
-    height: 50px;
-    width: 1150px;
+    height: 80px;
+    width: 1115px;
 
     box-sizing: border-box;
-    background: url("../Images/singles-overlay.png") no-repeat top;
+    background: url("../Images/Header/HeaderFirst.png") no-repeat top;
     font-weight: bold;
     font-size: 28px;
-    text-shadow: 1px 1px 2px pink;
+    text-shadow: 1px 1px 2px black;
     text-transform: uppercase;
     text-align: center;
     position: relative;
@@ -26,7 +25,7 @@ body {
 
 header > * {
     position: absolute;
-    top: 50%;
+    top: 44%;
     transform: translateY(-50%);
 }
 
@@ -38,10 +37,12 @@ header > * {
 
 .player {
     font-weight: 600;
+    font-family: "Roboto", sans-serif;
 }
 
 .round {
     color: #fff;
+    font-family: "Roboto", sans-serif;
 }
 
 .clan-prefix {
@@ -59,16 +60,21 @@ header > * {
     justify-content: center;
     align-items: center;
     gap: 5px;
+    color: white;
 }
 
 /*positions*/
 
 #scoreOne {
-    left: 50px;
+    left: 70px;
+    max-width: 30px;
+    max-height: 45px;
 }
 
 #scoreTwo {
-    right: 50px;
+    right: 70px;
+    max-width: 30px;
+    max-height: 45px;
 }
 
 #countryOne {

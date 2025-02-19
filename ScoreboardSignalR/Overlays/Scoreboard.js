@@ -55,13 +55,13 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
     // Player 1
     updateElement("clanPrefixOne", input.clanPrefixOne);
     updateElement("nameOne", input.nameOne);
-    updateElement("scoreOne", input.scoreOne);
+    updateImage("scoreOne", input.scoreOne);
     updateImage("countryOne", input.countryOne);
 
     // Player 2
     updateElement("clanPrefixTwo", input.clanPrefixTwo);
     updateElement("nameTwo", input.nameTwo);
-    updateElement("scoreTwo", input.scoreTwo);
+    updateImage("scoreTwo", input.scoreTwo);
     updateImage("countryTwo", input.countryTwo);
 
     // Round & Prize Pool

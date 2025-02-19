@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
 namespace ScoreboardSignalR;
@@ -29,19 +28,7 @@ public class Startup
         {
             app.UseDeveloperExceptionPage();
         }
-        app.UseStaticFiles(new StaticFileOptions
-        {
-            FileProvider = new PhysicalFileProvider(@"D:\Solutions\ScoreboardSignalR\ScoreboardSignalR\Overlays"),
-            RequestPath = "/Overlays"
-        });
         
-        app.UseStaticFiles(new StaticFileOptions
-        {
-            FileProvider = new PhysicalFileProvider(@"D:\Solutions\ScoreboardSignalR\ScoreboardSignalR\Panel"),
-            RequestPath = "/Panel"
-        });
-        
-
         app.UseRouting();
         app.UseCors();
         app.UseEndpoints(endpoints =>
