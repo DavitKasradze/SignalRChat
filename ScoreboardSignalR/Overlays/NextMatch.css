@@ -10,11 +10,11 @@ body {
 }
 
 .header {
-    height: 94px;
-    width: 1500px;
+    height: 165px;
+    width: 1400px;
 
     box-sizing: border-box;
-    background: none; /* Start with no background */
+    background: url("../Images/Header/VS1_optimized.png") no-repeat top;
     font-weight: bold;
 
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
@@ -25,13 +25,7 @@ body {
     opacity: 0; /* Start hidden */
     transition: opacity 1s ease-in-out; /* Smooth fade-in */
 
-    animation: loadBackground 0s 2s forwards, fadeIn 1s 2s forwards;
-}
-
-@keyframes loadBackground {
-    to {
-        background: url("../Images/Header/HeaderFirst.png") no-repeat top;
-    }
+    animation: fadeIn 1s 500ms forwards; /* Apply fade-in after 500ms */
 }
 
 @keyframes fadeIn {
@@ -66,7 +60,7 @@ header > * {
 
 .clan-prefix,
 .upcoming-clan-prefix{
-    color: red;
+    color: #ff0000;
 }
 
 .character-img {
@@ -112,13 +106,27 @@ header > * {
     right: 125px;
 }
 
+#upcomingCharacterOne{
+    left: 0;
+    top: 0;
+    transform: scale(1, 1);
+    max-height: 142px;
+}
+
+#upcomingCharacterTwo{
+    right: 0;
+    top: 0;
+    transform: scale(1, 1);
+    max-height: 142px;
+}
+
 /*position in center*/
-#currentRound {
+#upcomingRound {
     left: 50%;
     transform: translate(-50%,-50%);
 }
 
 /*divide parent element size without scores to 3 equal parts*/
-.player, #currentRound {
-    width: calc((100% - 730px) / 3);
+.player, #upcomingRound {
+    width: calc((100% - 340px) / 2);
 }

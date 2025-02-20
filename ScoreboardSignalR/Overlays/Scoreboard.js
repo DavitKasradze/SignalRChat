@@ -1,6 +1,7 @@
 "use strict";
 
 let isFirstLoad = true;
+let isFirstLoadDelay = window.location.pathname.includes("NextMatch.html") ? 500 : 2700;
 
 let connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5000/scoreboardHub")
@@ -16,10 +17,10 @@ connection.start().then(() => {
 });
 
 connection.on("ReceiveScoreboardUpdate", (input) => {
-    function updateElement(id, value, prefixId = null) {
+    function updateElement(id, value,prefixId = null, nextMatch = false ,) {
         let element = document.getElementById(id);
         if (element) {
-            let delay = isFirstLoad ? 3000 : 500; // 3.7s on load, 0.5s after
+            let delay = isFirstLoad ? isFirstLoadDelay : 1500; // 3.7s on load, 0.5s after
 
             element.style.transition = "opacity 0.5s";
             element.style.opacity = "0"; // Fade out
@@ -36,13 +37,21 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
                     if (prefixElement) {
                         const combinedLength = value.length + prefixElement.innerText.length;
                         if (combinedLength > 15) {
-                            prefixElement.style.fontSize = element.style.fontSize = "20px";
+                            if (nextMatch){
+                                prefixElement.style.fontSize = element.style.fontSize = "48px";
+                            }else{
+                                prefixElement.style.fontSize = element.style.fontSize = "22px"; 
+                            }
                         } else {
-                            prefixElement.style.fontSize = element.style.fontSize = "28px";
+                            if (nextMatch){
+                                prefixElement.style.fontSize = element.style.fontSize = "54px";
+                            }else{
+                                prefixElement.style.fontSize = element.style.fontSize = "26px";
+                            }
                         }
                     }
                 } else {
-                    element.style.fontSize = value.length > 16 ? "20px" : "28px";
+                    element.style.fontSize = value.length > 16 ? "22px" : "26px";
                 }
 
                 element.style.opacity = "1"; // Fade in
@@ -53,7 +62,7 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
     function updateImage(id, value) {
         let element = document.getElementById(id);
         if (element) {
-            let delay = isFirstLoad ? 3000 : 500; // 3.7s on load, 0.5s after
+            let delay = isFirstLoad ? isFirstLoadDelay : 1500; // 3.7s on load, 0.5s after
 
             element.style.transition = "opacity 0.5s";
             element.style.opacity = "0"; // Fade out
@@ -88,13 +97,13 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
     updateElement("prizePool", input.prizePool);
 
     // Upcoming Match
-    updateElement("upcomingPrefixOne", input.upcomingPrefixOne);
     updateElement("upcomingNameOne", input.upcomingNameOne);
+    updateElement("upcomingPrefixOne", input.upcomingPrefixOne, "upcomingNameOne", true);
     updateElement("upcomingCountryOne", input.upcomingCountryOne);
     updateImage("upcomingCharacterOne", input.upcomingCharacterOne);
-
-    updateElement("upcomingPrefixTwo", input.upcomingPrefixTwo);
+    
     updateElement("upcomingNameTwo", input.upcomingNameTwo);
+    updateElement("upcomingPrefixTwo", input.upcomingPrefixTwo, "upcomingNameTwo", true);
     updateElement("upcomingCountryTwo", input.upcomingCountryTwo);
     updateImage("upcomingCharacterTwo", input.upcomingCharacterTwo);
 
@@ -104,4 +113,4 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
 // Once the first update cycle is complete, set isFirstLoad to false
 setTimeout(() => {
     isFirstLoad = false;
-}, 3000);
+}, 2500);
