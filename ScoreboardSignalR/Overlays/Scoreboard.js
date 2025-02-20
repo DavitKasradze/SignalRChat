@@ -8,7 +8,7 @@ let connection = new signalR.HubConnectionBuilder()
 
 connection.start().then(() => {
     console.log("Connection established");
-    
+
     connection.invoke("LoadSavedData")
         .catch(err => console.error(err));
 }).catch(err => {
@@ -16,10 +16,10 @@ connection.start().then(() => {
 });
 
 connection.on("ReceiveScoreboardUpdate", (input) => {
-    function updateElement(id, value) {
+    function updateElement(id, value, prefixId = null) {
         let element = document.getElementById(id);
         if (element) {
-            let delay = isFirstLoad ? 3000: 500; // 3.7s on load, 0.5s after
+            let delay = isFirstLoad ? 3000 : 500; // 3.7s on load, 0.5s after
 
             element.style.transition = "opacity 0.5s";
             element.style.opacity = "0"; // Fade out
@@ -31,8 +31,19 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
 
                 element.innerText = String(value).toUpperCase();
 
-                // Adjust font size dynamically
-                element.style.fontSize = value.length > 12 ? "24px" : "28px";
+                if (prefixId) {
+                    const prefixElement = document.getElementById(prefixId);
+                    if (prefixElement) {
+                        const combinedLength = value.length + prefixElement.innerText.length;
+                        if (combinedLength > 15) {
+                            prefixElement.style.fontSize = element.style.fontSize = "20px";
+                        } else {
+                            prefixElement.style.fontSize = element.style.fontSize = "28px";
+                        }
+                    }
+                } else {
+                    element.style.fontSize = value.length > 16 ? "20px" : "28px";
+                }
 
                 element.style.opacity = "1"; // Fade in
             }, delay);
@@ -54,21 +65,21 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
                 }
                 element.src = parts.join("/");
 
-                element.src = element.src+value+".png";
+                element.src = element.src + value + ".png";
                 element.style.opacity = '1';
             }, delay);
         }
     }
 
     // Player 1
-    updateElement("clanPrefixOne", input.clanPrefixOne);
     updateElement("nameOne", input.nameOne);
+    updateElement("clanPrefixOne", input.clanPrefixOne, "nameOne");
     updateImage("scoreOne", input.scoreOne);
     updateImage("countryOne", input.countryOne);
 
     // Player 2
-    updateElement("clanPrefixTwo", input.clanPrefixTwo);
     updateElement("nameTwo", input.nameTwo);
+    updateElement("clanPrefixTwo", input.clanPrefixTwo, "nameTwo");
     updateImage("scoreTwo", input.scoreTwo);
     updateImage("countryTwo", input.countryTwo);
 
@@ -93,4 +104,4 @@ connection.on("ReceiveScoreboardUpdate", (input) => {
 // Once the first update cycle is complete, set isFirstLoad to false
 setTimeout(() => {
     isFirstLoad = false;
-}, 3700);
+}, 3000);

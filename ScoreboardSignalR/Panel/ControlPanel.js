@@ -49,11 +49,11 @@ document.getElementById("newSet").addEventListener("click", () => {
     document.getElementById("upcomingPrefixOne").value = "";
     document.getElementById("upcomingNameOne").value = "";
     document.getElementById("upcomingCountryOne").value = "";
-    document.getElementById("upcomingCharacterOne").value = "";
+    document.getElementById("upcomingCharacterOne").value = "Unknown";
     document.getElementById("upcomingPrefixTwo").value = "";
     document.getElementById("upcomingNameTwo").value = "";
     document.getElementById("upcomingCountryTwo").value = "";
-    document.getElementById("upcomingCharacterTwo").value = "";
+    document.getElementById("upcomingCharacterTwo").value = "Unknown";
 });
 
 document.getElementById("scoreReset").addEventListener("click", () => {

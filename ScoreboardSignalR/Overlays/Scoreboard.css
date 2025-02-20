@@ -95,13 +95,13 @@ header > * {
 }
 
 #countryOne {
-    left: 0;
-    z-index: -1;
+    left: 420px;
+    z-index: -2;
 }
 
 #countryTwo {
-    right: 0;
-    z-index: -1;
+    right: 420px;
+    z-index: -2;
 }
 
 /*score position (50px) + score width (75px)*/
