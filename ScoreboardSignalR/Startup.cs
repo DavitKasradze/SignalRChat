@@ -14,7 +14,7 @@ public class Startup
         {
             options.AddDefaultPolicy(builder =>
             {
-                builder.WithOrigins("http://localhost:63342")
+                builder.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
@@ -28,6 +28,8 @@ public class Startup
         {
             app.UseDeveloperExceptionPage();
         }
+
+        app.UseStaticFiles();
         
         app.UseRouting();
         app.UseCors();
