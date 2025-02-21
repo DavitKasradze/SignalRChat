@@ -13,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <None Include="wwwroot\**" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="wwwroot\**" />
   </ItemGroup>
 
 </Project>

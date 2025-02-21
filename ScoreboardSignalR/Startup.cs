@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
 namespace ScoreboardSignalR;
@@ -28,10 +29,16 @@ public class Startup
         {
             app.UseDeveloperExceptionPage();
         }
-
-        app.UseStaticFiles();
         
         app.UseRouting();
+        
+        var embeddedFileProvider = new EmbeddedFileProvider(typeof(Program).Assembly, "ScoreboardSignalR.wwwroot");
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = embeddedFileProvider,
+            RequestPath = ""
+        });
+        
         app.UseCors();
         app.UseEndpoints(endpoints =>
         {
